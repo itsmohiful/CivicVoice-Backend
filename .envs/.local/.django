@@ -1,0 +1,31 @@
+# General
+# ------------------------------------------------------------------------------
+USE_DOCKER=yes
+IPYTHONDIR=/app/.ipython
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://redis:6379/0
+
+# Celery
+# ------------------------------------------------------------------------------
+CELERY_BROKER_URL=redis://redis:6379/0
+# Flower
+CELERY_FLOWER_USER=SHsKcDYEEJBfSxEmSGfxyByMEjYeFaOe
+CELERY_FLOWER_PASSWORD=Nz5dxWq6SOU9Wmdeh33RXuyrCMWduCnuva5cztbJxd4l8mSibBbGi6o3Tg5uAJek
+
+
+# CORS
+TRUSTED_CORS_ORIGINS="http://localhost,capacitor://localhost,http://localhost:3000,http://localhost:8000"
+
+# Email
+# ------------------------------------------------------------------------------
+DEFAULT_FROM_EMAIL=noreply@civicvoice_backend.com
+EMAIL_HOST='sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER="a1e6903e4a929f"  
+EMAIL_HOST_PASSWORD="cabcf313e6c7f8"  
+EMAIL_PORT="2525"
+FRONTEND_URL="http://localhost:3000"
+EMAIL_USE_TLS=True
+
+# postgres://user:password@host:5432/civicvoice_backend 
+DATABASE_URL=postgres://civicvoice_backend:civicvoice_backend@db:5432/civicvoice_backend
