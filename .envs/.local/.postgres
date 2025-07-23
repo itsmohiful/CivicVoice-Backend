@@ -1,0 +1,13 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=civicvoice_backend
+POSTGRES_USER=qfMMAGhrombJxTXWbfIjMUuEEJAvhpBe
+POSTGRES_PASSWORD=7gv6n9gwZ1GjOKphjlDqn4hJiVdy5rbdzcgJyQs5GQReVZK0Mjl0Nz0CvU0GjBnh
+
+# pgAdmin
+
+PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+PGADMIN_DEFAULT_PASSWORD: admin
+PGADMIN_CONFIG_SERVER_MODE: 'False'
