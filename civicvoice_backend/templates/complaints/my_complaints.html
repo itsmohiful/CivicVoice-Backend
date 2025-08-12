@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Complaints - CivicVoice{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .complaint-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        margin-bottom: 1rem;
+    }
+    .complaint-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .priority-high { color: #e74a3b; }
+    .priority-medium { color: #f6c23e; }
+    .priority-low { color: #1cc88a; }
+    .priority-urgent { color: #e74a3b; font-weight: bold; }
+    .priority-critical { color: #dc3545; font-weight: bold; }
+    .draft-indicator {
+        background: linear-gradient(45deg, #f8f9fa, #dee2e6);
+        border-left: 4px solid #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-user-edit mr-2"></i>My Complaints
+        </h1>
+        <div>
+            <a href="{% url 'complaints:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Complaint
+            </a>
+            <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-list"></i> All Complaints
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ complaints|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ complaints|length|add:"-1" }}<!-- Simplified for demo -->
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Resolved</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Drafts</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">1</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-edit fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4" id="complaintTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="all-tab" data-bs-toggle="tab" href="#all" role="tab">
+                <i class="fas fa-list"></i> All Complaints
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="draft-tab" data-bs-toggle="tab" href="#draft" role="tab">
+                <i class="fas fa-edit"></i> Drafts
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="submitted-tab" data-bs-toggle="tab" href="#submitted" role="tab">
+                <i class="fas fa-paper-plane"></i> Submitted
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="resolved-tab" data-bs-toggle="tab" href="#resolved" role="tab">
+                <i class="fas fa-check-circle"></i> Resolved
+            </a>
+        </li>
+    </ul>
+
+    <!-- Complaints List -->
+    <div class="tab-content" id="complaintTabContent">
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            {% if complaints %}
+                <div class="row">
+                    {% for complaint in complaints %}
+                        <div class="col-lg-6 col-xl-4">
+                            <div class="complaint-card card h-100 {% if complaint.status == 'draft' %}draft-indicator{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0 font-weight-bold" style="color: {{ complaint.category.color }};">
+                                        <i class="{{ complaint.category.icon }}"></i> {{ complaint.category.name }}
+                                    </h6>
+                                    <div>
+                                        <span class="badge status-badge 
+                                            {% if complaint.status == 'draft' %}badge-secondary
+                                            {% elif complaint.status == 'resolved' %}badge-success
+                                            {% elif complaint.status == 'in_progress' %}badge-warning
+                                            {% elif complaint.status == 'under_review' %}badge-info
+                                            {% else %}badge-primary{% endif %}">
+                                            {{ complaint.get_status_display }}
+                                        </span>
+                                        {% if complaint.privacy == 'private' %}
+                                            <i class="fas fa-lock text-muted ml-1" title="Private"></i>
+                                        {% elif complaint.privacy == 'anonymous' %}
+                                            <i class="fas fa-user-secret text-muted ml-1" title="Anonymous"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{% url 'complaints:detail' complaint.complaint_number %}" class="text-decoration-none">
+                                            {{ complaint.title|truncatechars:50 }}
+                                        </a>
+                                    </h5>
+                                    
+                                    <p class="card-text text-muted">
+                                        {{ complaint.description|truncatechars:100 }}
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>ID:</strong> {{ complaint.complaint_number }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i> 
+                                            {% if complaint.location %}
+                                                {{ complaint.location.city }}, {{ complaint.location.state }}
+                                            {% else %}
+                                                Location not specified
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <span class="badge badge-pill priority-{{ complaint.priority }}">
+                                            {{ complaint.get_priority_display }}
+                                        </span>
+                                        {% for tag in complaint.tags.all %}
+                                            <span class="badge badge-secondary" style="background-color: {{ tag.color }};">
+                                                {{ tag.name }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="card-footer">
+                                    <div class="row text-center mb-2">
+                                        <div class="col-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-eye"></i> {{ complaint.view_count }}
+                                            </small>
+                                        </div>
+                                        <div class="col-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-thumbs-up"></i> {{ complaint.reaction_count }}
+                                            </small>
+                                        </div>
+                                        <div class="col-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-comments"></i> {{ complaint.comment_count }}
+                                            </small>
+                                        </div>
+                                        <div class="col-3">
+                                            <small class="text-muted">
+                                                {{ complaint.created_at|date:"M d" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{% url 'complaints:detail' complaint.complaint_number %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% if complaint.status == 'draft' or complaint.status == 'submitted' %}
+                                            <a href="{% url 'complaints:update' complaint.complaint_number %}" 
+                                               class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        {% endif %}
+                                        {% if complaint.status != 'draft' %}
+                                            <a href="{% url 'complaints:analytics' complaint.complaint_number %}" 
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-chart-bar"></i> Stats
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-3x text-gray-300 mb-3"></i>
+                    <h4 class="text-gray-500">No complaints yet</h4>
+                    <p class="text-gray-400">Start by <a href="{% url 'complaints:create' %}">creating your first complaint</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav aria-label="My complaints pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Tab filtering functionality
+    document.querySelectorAll('#complaintTabs a').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // You can add AJAX filtering here if needed
+        });
+    });
+</script>
+{% endblock %}

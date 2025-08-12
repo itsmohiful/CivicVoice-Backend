@@ -24,14 +24,42 @@ def _update_or_create_site_with_sequence(site_model, connection, domain, name):
         # To avoid this, we need to manually update DB sequence and make sure it's
         # greater than the maximum value.
         max_id = site_model.objects.order_by('-id').first().id
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT last_value from django_site_id_seq")
-            (current_id,) = cursor.fetchone()
-            if current_id <= max_id:
+        
+        # Handle sequence reset based on database backend
+        db_vendor = connection.vendor
+        
+        if db_vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT last_value from django_site_id_seq")
+                (current_id,) = cursor.fetchone()
+                if current_id <= max_id:
+                    cursor.execute(
+                        "alter sequence django_site_id_seq restart with %s",
+                        [max_id + 1],
+                    )
+        elif db_vendor == 'sqlite':
+            # SQLite uses different approach for auto-increment
+            with connection.cursor() as cursor:
+                # Update sqlite_sequence table if it exists
                 cursor.execute(
-                    "alter sequence django_site_id_seq restart with %s",
-                    [max_id + 1],
+                    "UPDATE sqlite_sequence SET seq = %s WHERE name = 'django_site'",
+                    [max_id]
                 )
+                # If no rows were affected, insert the sequence record
+                if cursor.rowcount == 0:
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO sqlite_sequence (name, seq) VALUES ('django_site', %s)",
+                        [max_id]
+                    )
+        elif db_vendor == 'mysql':
+            # MySQL auto_increment handling
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "ALTER TABLE django_site AUTO_INCREMENT = %s",
+                    [max_id + 1]
+                )
+        # For other databases (Oracle, etc.), we might need additional handling
+        # but they're less commonly used with Django
 
 
 def update_site_forward(apps, schema_editor):

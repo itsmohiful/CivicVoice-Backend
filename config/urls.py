@@ -8,6 +8,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from graphene_django.views import GraphQLView
 from graphene_file_upload.django import FileUploadGraphQLView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 
 urlpatterns = [
@@ -18,6 +23,18 @@ urlpatterns = [
     # User management
     path("users/", include("civicvoice_backend.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    # Complaints system
+    path("complaints/", include("civicvoice_backend.complaints.urls", namespace="complaints")),
+    # Dashboard
+    #path("dashboard/", include("civicvoice_backend.dashboard.urls", namespace="dashboard")),
+    # Settings
+    #path("settings/", include("civicvoice_backend.setting.urls", namespace="settings")),
+    # REST API
+    path("api/", include("civicvoice_backend.complaints.api.urls")),
+    # JWT Authentication
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
