@@ -1,0 +1,1106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Complaint - CivicVoice{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #a5b4fc;
+        --secondary-color: #f1f5f9;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #3b82f6;
+        --dark-color: #1e293b;
+        --light-color: #f8fafc;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-weight: 400;
+    }
+
+    .container-fluid {
+        background: var(--light-color);
+        border-radius: 24px;
+        margin: 2rem auto;
+        padding: 0;
+        max-width: 1400px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 3rem 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(100px, -100px);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-weight: 400;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .header-actions .btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-actions .btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .content-wrapper {
+        padding: 2.5rem;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+        border: none;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2.5rem;
+        border-left: 4px solid var(--info-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .alert-info .fas {
+        color: var(--info-color);
+        font-size: 1.125rem;
+    }
+
+    .form-section {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 0 0 0 20px;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--secondary-color);
+    }
+
+    .section-header h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0 0 0 1rem;
+    }
+
+    .section-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+        font-size: 0.875rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        font-size: 0.975rem;
+        transition: all 0.3s ease;
+        background: var(--light-color);
+        font-weight: 400;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.15);
+        background: white;
+    }
+
+    .form-control:hover, .form-select:hover {
+        border-color: var(--primary-light);
+        background: white;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .char-counter i {
+        font-size: 0.75rem;
+    }
+
+    .priority-indicator {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin-right: 12px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .priority-info {
+        background: var(--secondary-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 0.75rem;
+    }
+
+    .priority-info div {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .tag-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .tag-item {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .tag-item:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .tag-item input[type="checkbox"]:checked + label .tag-badge {
+        background: var(--primary-color) !important;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .tag-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .privacy-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .privacy-card {
+        background: var(--light-color);
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .privacy-card:hover {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-check {
+        margin: 0;
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-left: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.975rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-color: var(--primary-color);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #3730a3 100%);
+    }
+
+    .btn-outline-primary {
+        background: white;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        border-color: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        border-color: #4b5563;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-secondary {
+        background: white;
+        border-color: #6b7280;
+        color: #6b7280;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #6b7280;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .form-actions {
+        background: var(--secondary-color);
+        margin: 2rem -2.5rem -2.5rem;
+        padding: 2rem 2.5rem;
+        border-radius: 0 0 20px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .text-danger {
+        color: var(--danger-color) !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .text-danger::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        font-size: 0.75rem;
+    }
+
+    .form-text {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 400;
+    }
+
+    @media (max-width: 768px) {
+        .container-fluid {
+            margin: 0;
+            border-radius: 0;
+        }
+        
+        .page-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .tag-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .privacy-options {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .btn.loading .loading-spinner {
+        display: inline-block;
+    }
+
+    .btn.loading .btn-text {
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Enhanced Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-plus-circle me-3"></i>Submit New Complaint
+        </h1>
+        <p class="subtitle">Help us serve you better by providing detailed information about your concern</p>
+        
+        <div class="header-actions">
+            <a href="{% url 'complaints:list' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Back to Complaints
+            </a>
+            <a href="{% url 'complaints:my_complaints' %}" class="btn">
+                <i class="fas fa-user-circle"></i> My Complaints
+            </a>
+            <a href="{% url 'complaints:help' %}" class="btn">
+                <i class="fas fa-question-circle"></i> Need Help?
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Enhanced Help Text -->
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>Pro Tip:</strong> The more specific and detailed your complaint, the faster and more effectively authorities can address your concern. Include dates, locations, and any relevant evidence.
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="complaintForm">
+            {% csrf_token %}
+            
+            <!-- Enhanced Basic Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h4>Basic Information</h4>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                            <i class="fas fa-heading"></i>
+                            <strong>Complaint Title *</strong>
+                        </label>
+                        {{ form.title }}
+                        <div class="char-counter">
+                            <i class="fas fa-text-width"></i>
+                            <span id="title-count">0</span>/200 characters
+                        </div>
+                        {% if form.title.help_text %}
+                            <div class="form-text">{{ form.title.help_text }}</div>
+                        {% endif %}
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-12 mb-4">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            <strong>Detailed Description *</strong>
+                        </label>
+                        {{ form.description }}
+                        <div class="char-counter">
+                            <i class="fas fa-text-height"></i>
+                            <span id="description-count">0</span> characters (minimum 50 required)
+                        </div>
+                        {% if form.description.help_text %}
+                            <div class="form-text">{{ form.description.help_text }}</div>
+                        {% endif %}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Category Selection -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h4>Category & Classification</h4>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">
+                            <i class="fas fa-building"></i>
+                            <strong>Department/Category *</strong>
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.subcategory.id_for_label }}" class="form-label">
+                            <i class="fas fa-list-ul"></i>
+                            <strong>Specific Issue Type</strong>
+                        </label>
+                        {{ form.subcategory }}
+                        {% if form.subcategory.errors %}
+                            <div class="text-danger">{{ form.subcategory.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.priority.id_for_label }}" class="form-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Priority Level *</strong>
+                        </label>
+                        {{ form.priority }}
+                        <div class="priority-info">
+                            <div><span class="priority-indicator" style="background-color: #10b981;"></span>Low: General issues, not urgent</div>
+                            <div><span class="priority-indicator" style="background-color: #f59e0b;"></span>Medium: Significant impact, needs attention</div>
+                            <div><span class="priority-indicator" style="background-color: #ef4444;"></span>High: Serious issue, immediate attention needed</div>
+                            <div><span class="priority-indicator" style="background-color: #dc2626;"></span>Critical: Emergency situation</div>
+                        </div>
+                        {% if form.priority.errors %}
+                            <div class="text-danger">{{ form.priority.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.incident_date.id_for_label }}" class="form-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            <strong>When did this happen?</strong>
+                        </label>
+                        {{ form.incident_date }}
+                        {% if form.incident_date.help_text %}
+                            <div class="form-text">{{ form.incident_date.help_text }}</div>
+                        {% endif %}
+                        {% if form.incident_date.errors %}
+                            <div class="text-danger">{{ form.incident_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Enhanced Tags -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-hashtag"></i>
+                        <strong>Tags (Optional)</strong>
+                    </label>
+                    <div class="tag-container">
+                        {% for tag in available_tags %}
+                            <div class="tag-item">
+                                <div class="form-check">
+                                    <input type="checkbox" name="tags" value="{{ tag.id }}" 
+                                           id="id_tags_{{ tag.id }}" class="form-check-input">
+                                    <label for="id_tags_{{ tag.id }}" class="form-check-label">
+                                        <span class="tag-badge" style="background-color: {{ tag.color }}; color: white;">
+                                            <i class="fas fa-tag me-1"></i>{{ tag.name }}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No tags available. Please contact administrator to add tags.</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.tags.help_text %}
+                        <div class="form-text">{{ form.tags.help_text }}</div>
+                    {% endif %}
+                    {% if form.tags.errors %}
+                        <div class="text-danger">{{ form.tags.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Enhanced Location Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h4>Location Information</h4>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.country.id_for_label }}" class="form-label">
+                            <i class="fas fa-globe"></i>
+                            <strong>Country *</strong>
+                        </label>
+                        {{ form.country }}
+                        {% if form.country.errors %}
+                            <div class="text-danger">{{ form.country.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.state.id_for_label }}" class="form-label">
+                            <i class="fas fa-map"></i>
+                            <strong>State/Division *</strong>
+                        </label>
+                        {{ form.state }}
+                        {% if form.state.errors %}
+                            <div class="text-danger">{{ form.state.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.city.id_for_label }}" class="form-label">
+                            <i class="fas fa-city"></i>
+                            <strong>City *</strong>
+                        </label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <div class="text-danger">{{ form.city.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.area.id_for_label }}" class="form-label">
+                            <i class="fas fa-location-dot"></i>
+                            <strong>Area/Locality</strong>
+                        </label>
+                        {{ form.area }}
+                        {% if form.area.errors %}
+                            <div class="text-danger">{{ form.area.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-12 mb-4">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">
+                            <i class="fas fa-address-card"></i>
+                            <strong>Full Address (Optional)</strong>
+                        </label>
+                        {{ form.address }}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Provide complete address for precise location identification
+                        </div>
+                        {% if form.address.errors %}
+                            <div class="text-danger">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Privacy & Settings -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Privacy & Settings</h4>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="{{ form.privacy.id_for_label }}" class="form-label">
+                            <i class="fas fa-eye"></i>
+                            <strong>Who can see this complaint? *</strong>
+                        </label>
+                        {{ form.privacy }}
+                        <div class="privacy-options mt-3">
+                            <div class="privacy-card">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-globe fa-2x text-success me-3"></i>
+                                    <div>
+                                        <strong>Public</strong>
+                                        <p class="mb-0 text-muted small">Visible to everyone, searchable</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="privacy-card">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-lock fa-2x text-warning me-3"></i>
+                                    <div>
+                                        <strong>Private</strong>
+                                        <p class="mb-0 text-muted small">Only you and government officials can see</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="privacy-card">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-secret fa-2x text-info me-3"></i>
+                                    <div>
+                                        <strong>Anonymous</strong>
+                                        <p class="mb-0 text-muted small">Public but your identity is hidden</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if form.privacy.errors %}
+                            <div class="text-danger">{{ form.privacy.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-users"></i>
+                            <strong>Community Interaction</strong>
+                        </label>
+                        <div class="privacy-card">
+                            <div class="form-check mb-3">
+                                {{ form.allow_comments }}
+                                <label for="{{ form.allow_comments.id_for_label }}" class="form-check-label">
+                                    <i class="fas fa-comment me-2"></i>
+                                    Allow others to comment on this complaint
+                                </label>
+                                <div class="form-text">Enable community discussion and support</div>
+                            </div>
+                            <div class="form-check">
+                                {{ form.allow_sharing }}
+                                <label for="{{ form.allow_sharing.id_for_label }}" class="form-check-label">
+                                    <i class="fas fa-share me-2"></i>
+                                    Allow others to share this complaint
+                                </label>
+                                <div class="form-text">Help spread awareness about your issue</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Submit Buttons -->
+            <div class="form-actions">
+                <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> 
+                    <span class="btn-text">Cancel</span>
+                </a>
+                
+                <div class="d-flex gap-3">
+                    <button type="submit" name="action" value="draft" class="btn btn-outline-primary">
+                        <i class="fas fa-save"></i>
+                        <span class="loading-spinner"></span>
+                        <span class="btn-text">Save as Draft</span>
+                    </button>
+                    <button type="submit" name="action" value="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span class="loading-spinner"></span>
+                        <span class="btn-text">Submit Complaint</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Enhanced Complaint Form JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Enhanced complaint form loaded');
+    
+    // Character counters with enhanced styling
+    const titleField = document.getElementById('{{ form.title.id_for_label }}');
+    const descriptionField = document.getElementById('{{ form.description.id_for_label }}');
+    const titleCounter = document.getElementById('title-count');
+    const descriptionCounter = document.getElementById('description-count');
+    
+    function updateCounter(field, counter, max = null) {
+        if (field && counter) {
+            const currentLength = field.value.length;
+            counter.textContent = currentLength;
+            
+            // Color coding based on length
+            const parent = counter.parentElement;
+            parent.classList.remove('text-success', 'text-warning', 'text-danger');
+            
+            if (max) {
+                const percentage = (currentLength / max) * 100;
+                if (percentage < 50) {
+                    parent.classList.add('text-success');
+                } else if (percentage < 80) {
+                    parent.classList.add('text-warning');
+                } else if (percentage >= 100) {
+                    parent.classList.add('text-danger');
+                } else {
+                    parent.classList.add('text-warning');
+                }
+            } else {
+                // For description (minimum based)
+                if (currentLength < 25) {
+                    parent.classList.add('text-danger');
+                } else if (currentLength < 50) {
+                    parent.classList.add('text-warning');
+                } else {
+                    parent.classList.add('text-success');
+                }
+            }
+        }
+    }
+    
+    // Real-time character counting
+    if (titleField) {
+        updateCounter(titleField, titleCounter, 200);
+        titleField.addEventListener('input', () => updateCounter(titleField, titleCounter, 200));
+        
+        // Auto-save draft functionality
+        let titleTimeout;
+        titleField.addEventListener('input', function() {
+            clearTimeout(titleTimeout);
+            titleTimeout = setTimeout(() => {
+                // Auto-save logic could go here
+                console.log('Auto-saving draft...');
+            }, 2000);
+        });
+    }
+    
+    if (descriptionField) {
+        updateCounter(descriptionField, descriptionCounter);
+        descriptionField.addEventListener('input', () => updateCounter(descriptionField, descriptionCounter));
+        
+        // Auto-expand textarea
+        descriptionField.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    }
+    
+    // Enhanced category/subcategory loading
+    const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+    const subcategorySelect = document.getElementById('{{ form.subcategory.id_for_label }}');
+    
+    if (categorySelect && subcategorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            
+            // Add loading state
+            subcategorySelect.disabled = true;
+            subcategorySelect.innerHTML = '<option value="">Loading subcategories...</option>';
+            
+            if (categoryId) {
+                // Simulate API call (replace with actual AJAX)
+                setTimeout(() => {
+                    subcategorySelect.innerHTML = '<option value="">Select a subcategory...</option>';
+                    // Add actual subcategories here
+                    subcategorySelect.disabled = false;
+                }, 500);
+            } else {
+                subcategorySelect.innerHTML = '<option value="">Select a category first</option>';
+            }
+        });
+    }
+    
+    // Enhanced form validation with visual feedback
+    const form = document.getElementById('complaintForm');
+    const submitButtons = form.querySelectorAll('button[type="submit"]');
+    
+    // Add loading states to submit buttons
+    form.addEventListener('submit', function(e) {
+        const activeButton = e.submitter;
+        
+        // Basic validation
+        const title = titleField.value.trim();
+        const description = descriptionField.value.trim();
+        
+        if (title.length < 10) {
+            e.preventDefault();
+            showFieldError(titleField, 'Title must be at least 10 characters long.');
+            return;
+        }
+        
+        if (description.length < 50) {
+            e.preventDefault();
+            showFieldError(descriptionField, 'Description must be at least 50 characters long.');
+            return;
+        }
+        
+        // Add loading state
+        if (activeButton) {
+            activeButton.classList.add('loading');
+            activeButton.disabled = true;
+            
+            // Prevent double submission
+            submitButtons.forEach(btn => btn.disabled = true);
+        }
+    });
+    
+    // Field error display function
+    function showFieldError(field, message) {
+        // Remove existing error
+        const existingError = field.parentElement.querySelector('.custom-error');
+        if (existingError) existingError.remove();
+        
+        // Add error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'custom-error text-danger mt-2';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${message}`;
+        field.parentElement.appendChild(errorDiv);
+        
+        // Highlight field
+        field.classList.add('is-invalid');
+        field.focus();
+        
+        // Scroll to field
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Remove error on input
+        field.addEventListener('input', function() {
+            field.classList.remove('is-invalid');
+            const error = field.parentElement.querySelector('.custom-error');
+            if (error) error.remove();
+        }, { once: true });
+    }
+    
+    // Enhanced tag selection with visual feedback
+    const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
+    tagCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const tagItem = this.closest('.tag-item');
+            if (this.checked) {
+                tagItem.style.transform = 'scale(1.02)';
+                tagItem.style.borderColor = 'var(--primary-color)';
+                tagItem.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
+            } else {
+                tagItem.style.transform = 'scale(1)';
+                tagItem.style.borderColor = 'var(--border-color)';
+                tagItem.style.backgroundColor = 'white';
+            }
+        });
+    });
+    
+    // Privacy option visual feedback
+    const privacyRadios = document.querySelectorAll('input[name="privacy"]');
+    privacyRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Reset all privacy cards
+            document.querySelectorAll('.privacy-card').forEach(card => {
+                card.style.borderColor = 'var(--border-color)';
+                card.style.backgroundColor = 'var(--light-color)';
+            });
+            
+            // Highlight selected option
+            // This would need to be enhanced based on the actual form structure
+        });
+    });
+    
+    // Smooth scrolling for form sections
+    const sectionHeaders = document.querySelectorAll('.section-header');
+    sectionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            this.closest('.form-section').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        });
+    });
+    
+    // Auto-save notification
+    function showAutoSaveNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success position-fixed';
+        notification.style.cssText = `
+            top: 20px; 
+            right: 20px; 
+            z-index: 9999;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        `;
+        notification.innerHTML = '<i class="fas fa-check me-2"></i>Draft saved automatically';
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => notification.style.opacity = '1', 100);
+        
+        // Animate out
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    // Progress indicator (could be enhanced)
+    function updateFormProgress() {
+        const totalFields = form.querySelectorAll('input[required], select[required], textarea[required]').length;
+        const completedFields = Array.from(form.querySelectorAll('input[required], select[required], textarea[required]'))
+            .filter(field => field.value.trim() !== '').length;
+        
+        const progress = (completedFields / totalFields) * 100;
+        console.log(`Form completion: ${progress.toFixed(1)}%`);
+        
+        // This could be displayed in a progress bar
+    }
+    
+    // Monitor form changes for progress
+    const formInputs = form.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', updateFormProgress);
+        input.addEventListener('input', updateFormProgress);
+    });
+    
+    // Initial progress calculation
+    updateFormProgress();
+    
+    console.log('Enhanced complaint form initialization complete');
+});
+</script>
+{% endblock %}

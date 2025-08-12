@@ -28,3 +28,5 @@ django-graphql-jwt==0.4.0  # https://github.com/flavors/django-graphql-jwt
 graphene-file-upload==1.3.0
 django-filter==24.3  # https://github.com/carltongibson/django-filter
 
+djangorestframework
+djangorestframework-simplejwt
