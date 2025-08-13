@@ -240,79 +240,113 @@ def add_comment(request, complaint_number):
         comment = form.save(commit=False)
         comment.complaint = complaint
         comment.created_by = request.user
+        
+        # Handle parent comment for replies
+        parent_comment_id = request.POST.get('parent_comment')
+        if parent_comment_id:
+            try:
+                parent_comment = ComplaintComment.objects.get(
+                    id=parent_comment_id, 
+                    complaint=complaint
+                )
+                comment.parent = parent_comment
+            except ComplaintComment.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Parent comment not found'})
+        
         comment.save()
         
         return JsonResponse({
             'success': True,
-            'comment_id': comment.id,
-            'content': comment.content,
-            'author': comment.created_by.get_full_name() or comment.created_by.username,
-            'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M'),
-            'is_official': comment.is_official
+            'comment': {
+                'id': comment.id,
+                'content': comment.content,
+                'author': (comment.created_by.get_full_name() if comment.created_by and comment.created_by.get_full_name() 
+                          else comment.created_by.username if comment.created_by 
+                          else 'Anonymous'),
+                'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M'),
+                'is_official': comment.is_official,
+                'is_reply': bool(comment.parent)
+            }
         })
     
     return JsonResponse({'success': False, 'errors': form.errors})
 
 
 @login_required
-@login_required
 @require_POST
 def toggle_reaction(request, complaint_number):
     """
     Toggle reaction on complaint via AJAX
     """
-    complaint = get_object_or_404(Complaint, complaint_number=complaint_number)
-    
-    # Handle both JSON and form data
-    if request.content_type == 'application/json':
-        import json
-        data = json.loads(request.body)
-        reaction_type = data.get('reaction_type')
-    else:
-        reaction_type = request.POST.get('reaction_type')
-    
-    if reaction_type not in dict(ComplaintReaction.ReactionType.choices):
-        return JsonResponse({'success': False, 'error': 'Invalid reaction type'})
-    
-    with transaction.atomic():
-        reaction, created = ComplaintReaction.objects.get_or_create(
-            complaint=complaint,
-            user=request.user,
-            defaults={'reaction_type': reaction_type}
-        )
+    try:
+        complaint = get_object_or_404(Complaint, complaint_number=complaint_number)
         
-        user_reacted = True
-        if not created:
-            if reaction.reaction_type == reaction_type:
-                # Remove reaction if same type
-                reaction.delete()
-                user_reacted = False
-                action = 'removed'
-            else:
-                # Update reaction type
-                reaction.reaction_type = reaction_type
-                reaction.save()
-                action = 'updated'
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            import json
+            data = json.loads(request.body)
+            reaction_type = data.get('reaction_type')
         else:
-            action = 'added'
+            reaction_type = request.POST.get('reaction_type')
         
-        # Get the specific count for this reaction type
-        count = complaint.reactions.filter(reaction_type=reaction_type).count()
+        # Debug logging
+        print(f"Received reaction_type: {reaction_type}")
+        print(f"Available choices: {dict(ComplaintReaction.ReactionType.choices)}")
         
-        # Get updated total counts
-        reaction_counts = complaint.reactions.values('reaction_type').annotate(
-            count=Count('id')
-        )
-        counts = {r['reaction_type']: r['count'] for r in reaction_counts}
+        # Validate reaction type
+        valid_types = [choice[0] for choice in ComplaintReaction.ReactionType.choices]
+        if reaction_type not in valid_types:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Invalid reaction type: {reaction_type}. Valid types: {valid_types}'
+            })
+        
+        with transaction.atomic():
+            reaction, created = ComplaintReaction.objects.get_or_create(
+                complaint=complaint,
+                user=request.user,
+                defaults={'reaction_type': reaction_type}
+            )
+            
+            user_reacted = True
+            if not created:
+                if reaction.reaction_type == reaction_type:
+                    # Remove reaction if same type
+                    reaction.delete()
+                    user_reacted = False
+                    action = 'removed'
+                else:
+                    # Update reaction type
+                    reaction.reaction_type = reaction_type
+                    reaction.save()
+                    action = 'updated'
+            else:
+                action = 'added'
+            
+            # Get the specific count for this reaction type
+            count = complaint.reactions.filter(reaction_type=reaction_type).count()
+            
+            # Get updated total counts
+            reaction_counts = complaint.reactions.values('reaction_type').annotate(
+                count=Count('id')
+            )
+            counts = {r['reaction_type']: r['count'] for r in reaction_counts}
+        
+        return JsonResponse({
+            'success': True,
+            'action': action,
+            'count': count,
+            'user_reacted': user_reacted,
+            'counts': counts,
+            'total_count': sum(counts.values())
+        })
     
-    return JsonResponse({
-        'success': True,
-        'action': action,
-        'count': count,
-        'user_reacted': user_reacted,
-        'counts': counts,
-        'total_count': sum(counts.values())
-    })
+    except Exception as e:
+        print(f"Error in toggle_reaction: {str(e)}")
+        return JsonResponse({
+            'success': False, 
+            'error': f'Server error: {str(e)}'
+        })
 
 
 @login_required
@@ -336,7 +370,7 @@ def toggle_follow(request, complaint_number):
     
     return JsonResponse({
         'success': True,
-        'following': following,
+        'is_following': following,
         'follower_count': complaint.followers.count()
     })
 
@@ -374,17 +408,34 @@ def report_complaint(request, complaint_number):
     """
     complaint = get_object_or_404(Complaint, complaint_number=complaint_number)
     
-    form = ComplaintReportForm(request.POST)
-    if form.is_valid():
-        report = form.save(commit=False)
-        report.complaint = complaint
-        report.reported_by = request.user
-        report.save()
-        
-        messages.success(request, _('Complaint reported successfully. We will review it soon.'))
-        return JsonResponse({'success': True})
+    # Handle both form and direct POST data
+    reason = request.POST.get('reason', 'inappropriate')
+    description = request.POST.get('description', '')
     
-    return JsonResponse({'success': False, 'errors': form.errors})
+    # Check if user already reported this complaint
+    existing_report = ComplaintReport.objects.filter(
+        complaint=complaint,
+        reported_by=request.user
+    ).first()
+    
+    if existing_report:
+        return JsonResponse({
+            'success': False, 
+            'error': 'You have already reported this complaint'
+        })
+    
+    # Create the report
+    report = ComplaintReport.objects.create(
+        complaint=complaint,
+        reported_by=request.user,
+        reason=reason,
+        description=description
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Thank you for your report. We will review it soon.'
+    })
 
 
 class CategoryComplaintsView(ListView):

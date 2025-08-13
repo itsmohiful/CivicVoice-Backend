@@ -1,0 +1,1222 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ complaint.title }} - CivicVoice{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .complaint-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+    }
+    .status-badge {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+    }
+    .priority-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .info-card {
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .reaction-btn {
+        border: 2px solid #e3e6f0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+    }
+    .reaction-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        border-color: #4e73df;
+    }
+    .reaction-btn:active {
+        transform: translateY(0px);
+        animation: pulse 0.3s ease;
+    }
+    .reaction-btn.active {
+        background: linear-gradient(135deg, #4e73df 0%, #667eea 100%);
+        color: white;
+        border-color: #4e73df;
+        transform: translateY(-1px);
+    }
+    .reaction-btn.active .reaction-emoji {
+        animation: bounce 0.5s ease;
+    }
+    .reaction-emoji {
+        font-size: 1.2rem;
+        display: inline-block;
+        margin-right: 0.25rem;
+        transition: transform 0.3s ease;
+    }
+    .reaction-container {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .reaction-count {
+        min-width: 24px;
+        text-align: center;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .reaction-summary {
+        padding-top: 0.75rem;
+        border-top: 1px solid #e3e6f0;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+    }
+    @keyframes bounce {
+        0%, 20%, 60%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-3px); }
+        80% { transform: translateY(-1px); }
+    }
+    .reaction-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    .comment-card {
+        border-left: 3px solid #e3e6f0;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+    .comment-card.reply {
+        margin-left: 2rem;
+        border-left-color: #4e73df;
+    }
+    .attachment-item {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: between;
+    }
+    .timeline-item {
+        border-left: 2px solid #e3e6f0;
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #4e73df;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="commentToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-comment text-primary me-2"></i>
+            <strong class="me-auto">Comment</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <!-- Toast message will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    
+    <!-- Complaint Header -->
+    <div class="complaint-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h3 mb-2">{{ complaint.title }}</h1>
+                    <p class="mb-0">
+                        <strong>Complaint #{{ complaint.complaint_number }}</strong>
+                        &bull; Filed {{ complaint.created_at|date:"M d, Y" }}
+                        {% if complaint.created_by %}
+                            &bull; By {{ complaint.created_by.name|default:complaint.created_by.username }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    {% if complaint.status == 'PENDING' %}
+                        <span class="badge bg-warning status-badge">
+                            <i class="fas fa-clock"></i> Pending Review
+                        </span>
+                    {% elif complaint.status == 'REVIEWED' %}
+                        <span class="badge bg-info status-badge">
+                            <i class="fas fa-eye"></i> Under Review
+                        </span>
+                    {% elif complaint.status == 'IN_PROGRESS' %}
+                        <span class="badge bg-primary status-badge">
+                            <i class="fas fa-cog fa-spin"></i> In Progress
+                        </span>
+                    {% elif complaint.status == 'RESOLVED' %}
+                        <span class="badge bg-success status-badge">
+                            <i class="fas fa-check"></i> Resolved
+                        </span>
+                    {% elif complaint.status == 'CLOSED' %}
+                        <span class="badge bg-secondary status-badge">
+                            <i class="fas fa-times"></i> Closed
+                        </span>
+                    {% elif complaint.status == 'REJECTED' %}
+                        <span class="badge bg-danger status-badge">
+                            <i class="fas fa-ban"></i> Rejected
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Complaints
+            </a>
+            {% if user.is_authenticated and complaint.created_by == user %}
+                <a href="{% url 'complaints:update' complaint.complaint_number %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            {% endif %}
+        </div>
+        <div>
+            {% if complaint.allow_sharing %}
+                <button class="btn btn-outline-info share-btn">
+                    <i class="fas fa-share"></i> Share
+                </button>
+            {% endif %}
+            <button class="btn btn-outline-warning report-btn">
+                <i class="fas fa-flag"></i> Report
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            
+            <!-- Complaint Details -->
+            <div class="card info-card mb-4">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Category</h6>
+                            <span class="badge bg-primary">{{ complaint.category.name }}</span>
+                            {% if complaint.subcategory %}
+                                <span class="badge bg-secondary">{{ complaint.subcategory.name }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h6 class="text-muted mb-1">Priority</h6>
+                            <span class="priority-badge">
+                                {% if complaint.priority == 'LOW' %}
+                                    <span class="priority-indicator" style="background-color: #1cc88a;"></span>
+                                    <span class="badge bg-success">Low Priority</span>
+                                {% elif complaint.priority == 'MEDIUM' %}
+                                    <span class="priority-indicator" style="background-color: #f6c23e;"></span>
+                                    <span class="badge bg-warning">Medium Priority</span>
+                                {% elif complaint.priority == 'HIGH' %}
+                                    <span class="priority-indicator" style="background-color: #e74a3b;"></span>
+                                    <span class="badge bg-danger">High Priority</span>
+                                {% elif complaint.priority == 'CRITICAL' %}
+                                    <span class="priority-indicator" style="background-color: #dc3545;"></span>
+                                    <span class="badge bg-danger">Critical</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Description</h6>
+                        <p class="mb-0">{{ complaint.description|linebreaks }}</p>
+                    </div>
+                    
+                    {% if complaint.incident_date %}
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Incident Date</h6>
+                            <p class="mb-0">{{ complaint.incident_date|date:"F d, Y" }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if complaint.tags.exists %}
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Tags</h6>
+                            {% for tag in complaint.tags.all %}
+                                <span class="badge" style="background-color: {{ tag.color }};">
+                                    {{ tag.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Location Information -->
+            <div class="card info-card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-map-marker-alt text-primary"></i> Location
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>City:</strong> {{ complaint.city }}</p>
+                            <p class="mb-1"><strong>State:</strong> {{ complaint.state }}</p>
+                            <p class="mb-1"><strong>Country:</strong> {{ complaint.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if complaint.area %}
+                                <p class="mb-1"><strong>Area:</strong> {{ complaint.area }}</p>
+                            {% endif %}
+                            {% if complaint.address %}
+                                <p class="mb-1"><strong>Address:</strong> {{ complaint.address }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            {% if complaint.attachments.exists %}
+                <div class="card info-card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-paperclip text-primary"></i> Attachments
+                        </h5>
+                        {% for attachment in complaint.attachments.all %}
+                            <div class="attachment-item">
+                                <div>
+                                    <i class="fas fa-file text-muted"></i>
+                                    <strong>{{ attachment.file_name }}</strong>
+                                    <small class="text-muted">({{ attachment.file_size|filesizeformat }})</small>
+                                    {% if attachment.description %}
+                                        <br><small>{{ attachment.description }}</small>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Reactions -->
+            {% if user.is_authenticated %}
+                <div class="card info-card mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">
+                            <span class="reaction-emoji">🤝</span> Community Response
+                        </h6>
+                        <div class="reaction-container d-flex flex-wrap gap-2 mb-3">
+                            <button class="reaction-btn btn{% if user_reaction.reaction_type == 'like' %} active{% endif %}" data-type="like">
+                                <span class="reaction-emoji">👍</span>
+                                <span class="reaction-text">Like</span>
+                                <span class="reaction-count badge bg-primary ms-1">{{ complaint.like_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn btn{% if user_reaction.reaction_type == 'support' %} active{% endif %}" data-type="support">
+                                <span class="reaction-emoji">❤️</span>
+                                <span class="reaction-text">Support</span>
+                                <span class="reaction-count badge bg-danger ms-1">{{ complaint.support_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn btn{% if user_reaction.reaction_type == 'concern' %} active{% endif %}" data-type="concern">
+                                <span class="reaction-emoji">😟</span>
+                                <span class="reaction-text">Concern</span>
+                                <span class="reaction-count badge bg-warning ms-1">{{ complaint.concern_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn btn{% if user_reaction.reaction_type == 'angry' %} active{% endif %}" data-type="angry">
+                                <span class="reaction-emoji">😠</span>
+                                <span class="reaction-text">Angry</span>
+                                <span class="reaction-count badge bg-danger ms-1">{{ complaint.angry_count|default:0 }}</span>
+                            </button>
+                            <button class="reaction-btn btn{% if user_reaction.reaction_type == 'sad' %} active{% endif %}" data-type="sad">
+                                <span class="reaction-emoji">😢</span>
+                                <span class="reaction-text">Sad</span>
+                                <span class="reaction-count badge bg-info ms-1">{{ complaint.sad_count|default:0 }}</span>
+                            </button>
+                        </div>
+                        <div class="reaction-summary">
+                            <small class="text-muted">
+                                <span class="reaction-emoji">📊</span>
+                                Total: <strong>{{ complaint.total_reactions|default:0 }}</strong> reaction{{ complaint.total_reactions|pluralize }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Comments Section -->
+            {% if complaint.allow_comments %}
+                <div class="card info-card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-comments text-primary"></i> 
+                            Comments ({{ complaint.comments.count }})
+                        </h5>
+                        
+                        {% if user.is_authenticated %}
+                            <form id="commentForm" class="mb-4">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <textarea name="content" id="commentContent" class="form-control" rows="3" 
+                                              placeholder="Share your thoughts or provide additional information..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-comment"></i> Add Comment
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <!-- Comments List -->
+                        {% for comment in complaint.comments.all %}
+                            <div class="comment-card">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>{{ comment.created_by.name|default:"Anonymous" }}</strong>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                    </div>
+                                    {% if user.is_authenticated %}
+                                        <button class="btn btn-sm btn-outline-secondary reply-btn" data-comment-id="{{ comment.id }}">
+                                            <i class="fas fa-reply"></i> Reply
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-2">{{ comment.content|linebreaks }}</p>
+                                
+                                {% if user.is_authenticated %}
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-sm btn-outline-primary comment-like-btn" data-comment-id="{{ comment.id }}">
+                                            <i class="fas fa-thumbs-up"></i> {{ comment.like_count }}
+                                        </button>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Replies -->
+                                {% for reply in comment.replies.all %}
+                                    <div class="comment-card reply">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong>{{ reply.created_by.name|default:reply.created_by.username }}</strong>
+                                                <small class="text-muted">{{ reply.created_at|timesince }} ago</small>
+                                            </div>
+                                        </div>
+                                        <p class="mb-0">{{ reply.content|linebreaks }}</p>
+                                    </div>
+                                {% endfor %}
+                                
+                                <!-- Reply Form (hidden by default) -->
+                                <div id="reply-form-{{ comment.id }}" class="reply-form mt-3" style="display: none;">
+                                    <form class="reply-form-ajax" data-comment-id="{{ comment.id }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                                        <div class="mb-3">
+                                            <textarea name="content" class="form-control" rows="2" 
+                                                      placeholder="Reply to {{ comment.created_by.name|default:'Anonymous' }}..." required></textarea>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-sm btn-primary">Reply</button>
+                                            <button type="button" class="btn btn-sm btn-secondary cancel-reply-btn" data-comment-id="{{ comment.id }}">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">No comments yet. Be the first to share your thoughts!</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            
+            <!-- Status Timeline -->
+            <div class="card info-card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">Status Timeline</h6>
+                    
+                    <div class="timeline-item">
+                        <h6 class="mb-1">Complaint Submitted</h6>
+                        <small class="text-muted">{{ complaint.created_at|date:"M d, Y g:i A" }}</small>
+                    </div>
+                    
+                    {% for update in complaint.status_updates.all %}
+                        <div class="timeline-item">
+                            <h6 class="mb-1">{{ update.get_status_display }}</h6>
+                            <small class="text-muted">{{ update.created_at|date:"M d, Y g:i A" }}</small>
+                            {% if update.note %}
+                                <p class="mb-0 mt-1"><small>{{ update.note }}</small></p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card info-card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">Engagement Stats</h6>
+                    
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="text-primary">{{ complaint.view_count }}</h4>
+                            <small class="text-muted">Views</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-success">{{ complaint.total_reactions }}</h4>
+                            <small class="text-muted">Reactions</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-info">{{ complaint.comments.count }}</h4>
+                            <small class="text-muted">Comments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Complaints -->
+            {% if related_complaints %}
+                <div class="card info-card">
+                    <div class="card-body">
+                        <h6 class="card-title">Similar Complaints</h6>
+                        {% for related in related_complaints %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <a href="{% url 'complaints:detail' related.complaint_number %}" class="text-decoration-none">
+                                    <h6 class="mb-1">{{ related.title|truncatechars:50 }}</h6>
+                                </a>
+                                <small class="text-muted">
+                                    {{ related.created_at|date:"M d" }} &bull; {{ related.category.name }}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Debug: Log that script is loaded
+console.log('Complaint detail script loaded - Dynamic version');
+
+// Global ComplaintApp object
+const ComplaintApp = {
+    // Initialize the app
+    init: function() {
+        console.log('Initializing ComplaintApp...');
+        this.attachEventListeners();
+        this.loadUserReactions();
+        console.log('ComplaintApp initialized successfully');
+    },
+
+    // Attach all event listeners
+    attachEventListeners: function() {
+        // Use event delegation for all dynamic buttons
+        document.addEventListener('click', this.handleClicks.bind(this));
+        document.addEventListener('submit', this.handleSubmits.bind(this));
+    },
+
+    // Handle all click events
+    handleClicks: function(e) {
+        const target = e.target.closest('button, .btn');
+        if (!target) return;
+
+        console.log('Button clicked:', target, 'Classes:', target.classList.toString());
+
+        // Reaction buttons
+        if (target.hasAttribute('data-type')) {
+            e.preventDefault();
+            const reactionType = target.getAttribute('data-type');
+            console.log('Reaction button clicked:', reactionType);
+            this.handleReaction(reactionType);
+            return;
+        }
+
+        // Reply buttons
+        if (target.classList.contains('reply-btn')) {
+            e.preventDefault();
+            const commentId = target.getAttribute('data-comment-id');
+            console.log('Reply button clicked for comment:', commentId);
+            this.toggleReplyForm(commentId);
+            return;
+        }
+
+        // Cancel reply buttons
+        if (target.classList.contains('cancel-reply-btn')) {
+            e.preventDefault();
+            const commentId = target.getAttribute('data-comment-id');
+            console.log('Cancel reply button clicked for comment:', commentId);
+            this.hideReplyForm(commentId);
+            return;
+        }
+
+        // Share button
+        if (target.classList.contains('share-btn')) {
+            e.preventDefault();
+            console.log('Share button clicked');
+            this.shareComplaint();
+            return;
+        }
+
+        // Report button
+        if (target.classList.contains('report-btn')) {
+            e.preventDefault();
+            console.log('Report button clicked');
+            this.reportComplaint();
+            return;
+        }
+
+        // Comment like buttons
+        if (target.classList.contains('comment-like-btn')) {
+            e.preventDefault();
+            const commentId = target.getAttribute('data-comment-id');
+            console.log('Comment like button clicked for comment:', commentId);
+            this.toggleCommentLike(commentId);
+            return;
+        }
+
+        console.log('Unhandled button click:', target);
+    },
+
+    // Handle all form submissions
+    handleSubmits: function(e) {
+        console.log('Form submitted:', e.target, 'ID:', e.target.id, 'Classes:', e.target.classList.toString());
+        
+        // Main comment form
+        if (e.target.id === 'commentForm') {
+            e.preventDefault();
+            console.log('Main comment form submitted');
+            this.submitComment(e.target);
+            return;
+        }
+
+        // Reply forms
+        if (e.target.classList.contains('reply-form-ajax')) {
+            e.preventDefault();
+            console.log('Reply form submitted');
+            this.submitReply(e.target);
+            return;
+        }
+
+        console.log('Unhandled form submission:', e.target);
+    },
+
+    // Show toast notification
+    showToast: function(message, isSuccess = true) {
+        console.log('showToast called:', message, isSuccess);
+        
+        const toast = document.getElementById('commentToast');
+        if (!toast) {
+            console.warn('Toast element not found, using alert fallback');
+            alert(message);
+            return;
+        }
+        
+        const toastBody = toast.querySelector('.toast-body');
+        const toastHeader = toast.querySelector('.toast-header');
+        
+        if (toastBody) toastBody.textContent = message;
+        
+        // Update toast style and icon
+        if (toastHeader) {
+            if (isSuccess) {
+                toastHeader.className = 'toast-header bg-success text-white';
+                toastHeader.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong class="me-auto">Success</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                `;
+            } else {
+                toastHeader.className = 'toast-header bg-danger text-white';
+                toastHeader.innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                `;
+            }
+        }
+        
+        // Show toast
+        try {
+            // Hide any existing toast first
+            const existingToast = bootstrap.Toast.getInstance(toast);
+            if (existingToast) {
+                existingToast.hide();
+            }
+            
+            // Create and show new toast
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: isSuccess ? 3000 : 5000
+            });
+            bsToast.show();
+        } catch (e) {
+            console.error('Bootstrap toast error:', e);
+            alert(message);
+        }
+    },
+
+    // Get CSRF token
+    getCSRFToken: function() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!token) {
+            console.error('CSRF token not found');
+            this.showToast('Security token not found. Please refresh the page.', false);
+            return null;
+        }
+        return token.value;
+    },
+
+    // Load user's existing reactions
+    loadUserReactions: function() {
+        // Mark active reactions based on backend data if available
+        // This would require additional backend data, for now we'll skip
+        console.log('User reactions loaded');
+    },
+
+    // Handle reaction button clicks
+    handleReaction: function(reactionType) {
+        console.log('handleReaction called with:', reactionType);
+        
+        const csrfToken = this.getCSRFToken();
+        if (!csrfToken) return;
+        
+        const reactionBtn = document.querySelector(`[data-type="${reactionType}"]`);
+        console.log('Found reaction button:', reactionBtn);
+        
+        // Show loading state
+        if (reactionBtn) {
+            reactionBtn.disabled = true;
+            reactionBtn.style.opacity = '0.6';
+        }
+        
+        const requestData = {
+            reaction_type: reactionType
+        };
+        console.log('Sending request data:', requestData);
+        
+        fetch('{% url "complaints:toggle_reaction" complaint.complaint_number %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Reaction response data:', data);
+            if (data.success) {
+                this.updateReactionUI(reactionType, data.count, data.user_reacted);
+                this.showToast(
+                    data.user_reacted ? 
+                        `You reacted with ${reactionType}!` : 
+                        `${reactionType} reaction removed`,
+                    true
+                );
+            } else {
+                console.error('Reaction failed:', data);
+                this.showToast(data.error || 'Failed to update reaction', false);
+            }
+        })
+        .catch(error => {
+            console.error('Reaction error:', error);
+            this.showToast(`Network error: ${error.message}. Please try again.`, false);
+        })
+        .finally(() => {
+            // Reset loading state
+            if (reactionBtn) {
+                reactionBtn.disabled = false;
+                reactionBtn.style.opacity = '1';
+            }
+        });
+    },
+
+    // Update reaction UI
+    updateReactionUI: function(reactionType, newCount, userReacted) {
+        const reactionBtn = document.querySelector(`[data-type="${reactionType}"]`);
+        if (!reactionBtn) return;
+        
+        // Update count
+        const countBadge = reactionBtn.querySelector('.reaction-count');
+        if (countBadge) {
+            countBadge.textContent = newCount;
+        }
+        
+        // Toggle active state
+        if (userReacted) {
+            reactionBtn.classList.add('active');
+        } else {
+            reactionBtn.classList.remove('active');
+        }
+        
+        // Update total reactions
+        this.updateTotalReactions();
+    },
+
+    // Update total reaction count
+    updateTotalReactions: function() {
+        let total = 0;
+        document.querySelectorAll('.reaction-count').forEach(badge => {
+            total += parseInt(badge.textContent) || 0;
+        });
+        
+        const totalElement = document.querySelector('.reaction-summary strong');
+        if (totalElement) {
+            totalElement.textContent = total;
+        }
+
+        // Update sidebar stats
+        const sidebarReactionCount = document.querySelector('.col-4 h4.text-success');
+        if (sidebarReactionCount) {
+            sidebarReactionCount.textContent = total;
+        }
+    },
+
+    // Submit main comment
+    submitComment: function(form) {
+        console.log('Submitting comment...');
+        
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const textarea = form.querySelector('textarea[name="content"]');
+        
+        console.log('Form data:', {
+            content: formData.get('content'),
+            csrf: formData.get('csrfmiddlewaretoken')
+        });
+        
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+        }
+        
+        fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Comment response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Comment response data:', data);
+            if (data.success) {
+                this.showToast('Comment added successfully!', true);
+                textarea.value = ''; // Clear form
+                this.addCommentToDOM(data, false);
+                this.updateCommentCount(1);
+            } else {
+                console.error('Comment submission failed:', data);
+                this.showToast(data.error || 'Failed to add comment', false);
+            }
+        })
+        .catch(error => {
+            console.error('Comment error:', error);
+            this.showToast(`Network error: ${error.message}. Please try again.`, false);
+        })
+        .finally(() => {
+            // Reset button state
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-comment"></i> Add Comment';
+            }
+        });
+    },
+
+    // Submit reply
+    submitReply: function(form) {
+        console.log('Submitting reply...');
+        
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const textarea = form.querySelector('textarea[name="content"]');
+        const commentId = form.getAttribute('data-comment-id');
+        
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Replying...';
+        }
+        
+        fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Reply response:', data);
+            if (data.success) {
+                this.showToast('Reply added successfully!', true);
+                textarea.value = ''; // Clear form
+                this.hideReplyForm(commentId);
+                this.addCommentToDOM(data, true, commentId);
+                this.updateCommentCount(1);
+            } else {
+                this.showToast(data.error || 'Failed to add reply', false);
+            }
+        })
+        .catch(error => {
+            console.error('Reply error:', error);
+            this.showToast('Network error. Please try again.', false);
+        })
+        .finally(() => {
+            // Reset button state
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reply';
+            }
+        });
+    },
+
+    // Toggle reply form visibility
+    toggleReplyForm: function(commentId) {
+        console.log('Toggling reply form for comment:', commentId);
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        if (replyForm) {
+            const isHidden = replyForm.style.display === 'none' || !replyForm.style.display;
+            replyForm.style.display = isHidden ? 'block' : 'none';
+            
+            // Focus on textarea when showing
+            if (isHidden) {
+                const textarea = replyForm.querySelector('textarea');
+                if (textarea) setTimeout(() => textarea.focus(), 100);
+            }
+        }
+    },
+
+    // Hide reply form
+    hideReplyForm: function(commentId) {
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        if (replyForm) {
+            replyForm.style.display = 'none';
+        }
+    },
+
+    // Add comment to DOM
+    addCommentToDOM: function(commentData, isReply = false, parentCommentId = null) {
+        console.log('Adding comment to DOM:', commentData, isReply, parentCommentId);
+        
+        const commentHtml = `
+            <div class="comment-card ${isReply ? 'reply' : ''}" data-comment-id="${commentData.comment_id}">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <strong>${commentData.author || 'Anonymous'}</strong>
+                        <small class="text-muted">just now</small>
+                    </div>
+                    {% if user.is_authenticated %}
+                        ${!isReply ? `<button class="btn btn-sm btn-outline-secondary reply-btn" data-comment-id="${commentData.comment_id}">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>` : ''}
+                    {% endif %}
+                </div>
+                <p class="mb-2">${this.escapeHtml(commentData.content)}</p>
+                
+                {% if user.is_authenticated and not isReply %}
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-primary comment-like-btn" data-comment-id="${commentData.comment_id}">
+                            <i class="fas fa-thumbs-up"></i> 0
+                        </button>
+                    </div>
+                {% endif %}
+                
+                ${!isReply ? `<div id="reply-form-${commentData.comment_id}" class="reply-form mt-3" style="display: none;">
+                    <form class="reply-form-ajax" data-comment-id="${commentData.comment_id}">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${this.getCSRFToken()}">
+                        <input type="hidden" name="parent_comment" value="${commentData.comment_id}">
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" rows="2" 
+                                      placeholder="Reply to ${commentData.author || 'Anonymous'}..." required></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-sm btn-primary">Reply</button>
+                            <button type="button" class="btn btn-sm btn-secondary cancel-reply-btn" data-comment-id="${commentData.comment_id}">Cancel</button>
+                        </div>
+                    </form>
+                </div>` : ''}
+            </div>
+        `;
+        
+        if (isReply && parentCommentId) {
+            // Add as reply after the parent comment
+            const parentElement = document.querySelector(`[data-comment-id="${parentCommentId}"]`);
+            if (parentElement) {
+                parentElement.insertAdjacentHTML('afterend', commentHtml);
+            }
+        } else {
+            // Add as new main comment
+            const commentsContainer = document.querySelector('.card-title i.fas.fa-comments').closest('.card').querySelector('.card-body');
+            const emptyMessage = commentsContainer.querySelector('.text-muted');
+            
+            if (emptyMessage && emptyMessage.textContent.includes('No comments yet')) {
+                emptyMessage.remove();
+            }
+            
+            // Insert before comment form if it exists
+            const commentForm = commentsContainer.querySelector('#commentForm');
+            if (commentForm) {
+                commentForm.insertAdjacentHTML('afterend', commentHtml);
+            } else {
+                commentsContainer.insertAdjacentHTML('beforeend', commentHtml);
+            }
+        }
+    },
+
+    // Update comment count
+    updateCommentCount: function(increment) {
+        const commentTitle = document.querySelector('.card-title i.fas.fa-comments').parentElement;
+        if (commentTitle) {
+            const match = commentTitle.textContent.match(/\((\d+)\)/);
+            const currentCount = match ? parseInt(match[1]) : 0;
+            const newCount = currentCount + increment;
+            commentTitle.innerHTML = `<i class="fas fa-comments text-primary"></i> Comments (${newCount})`;
+        }
+
+        // Update sidebar stats
+        const sidebarCommentCount = document.querySelector('.col-4 h4.text-info');
+        if (sidebarCommentCount) {
+            const currentCount = parseInt(sidebarCommentCount.textContent) || 0;
+            sidebarCommentCount.textContent = currentCount + increment;
+        }
+    },
+
+    // Share complaint
+    shareComplaint: function() {
+        console.log('Sharing complaint...');
+        
+        const csrfToken = this.getCSRFToken();
+        if (!csrfToken) return;
+
+        // Try native sharing first
+        if (navigator.share) {
+            navigator.share({
+                title: '{{ complaint.title|escapejs }}',
+                text: '{{ complaint.description|truncatechars:100|escapejs }}',
+                url: window.location.href
+            }).then(() => {
+                console.log('Native sharing successful');
+                this.trackShare('native');
+                this.showToast('Complaint shared successfully!', true);
+            }).catch(err => {
+                console.log('Native sharing failed:', err);
+                this.fallbackShare();
+            });
+        } else {
+            this.fallbackShare();
+        }
+    },
+
+    // Fallback share method
+    fallbackShare: function() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                this.showToast('Link copied to clipboard!', true);
+                this.trackShare('clipboard');
+            }).catch((err) => {
+                console.error('Clipboard write failed:', err);
+                this.ultimateFallbackShare();
+            });
+        } else {
+            this.ultimateFallbackShare();
+        }
+    },
+
+    // Ultimate fallback share method
+    ultimateFallbackShare: function() {
+        try {
+            const textArea = document.createElement('textarea');
+            textArea.value = window.location.href;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (successful) {
+                this.showToast('Link copied to clipboard!', true);
+                this.trackShare('clipboard');
+            } else {
+                this.showToast('Unable to copy link. Please copy manually: ' + window.location.href, false);
+            }
+        } catch (err) {
+            console.error('Ultimate fallback failed:', err);
+            this.showToast('Unable to copy link. Please copy manually: ' + window.location.href, false);
+        }
+    },
+
+    // Track share action
+    trackShare: function(platform) {
+        const csrfToken = this.getCSRFToken();
+        if (!csrfToken) return;
+
+        console.log('Tracking share on platform:', platform);
+
+        fetch('{% url "complaints:share_complaint" complaint.complaint_number %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `platform=${encodeURIComponent(platform)}`
+        })
+        .then(response => {
+            console.log('Share track response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Share tracked:', data);
+            if (!data.success) {
+                console.warn('Share tracking failed:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Share tracking error:', error);
+        });
+    },
+
+    // Report complaint
+    reportComplaint: function() {
+        if (!confirm('Are you sure you want to report this complaint as inappropriate?')) {
+            return;
+        }
+        
+        console.log('Reporting complaint...');
+        
+        const csrfToken = this.getCSRFToken();
+        if (!csrfToken) return;
+        
+        // Show loading feedback
+        const reportBtn = document.querySelector('.report-btn');
+        if (reportBtn) {
+            reportBtn.disabled = true;
+            reportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reporting...';
+        }
+        
+        fetch('{% url "complaints:report_complaint" complaint.complaint_number %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: 'reason=inappropriate&details=Reported via web interface'
+        })
+        .then(response => {
+            console.log('Report response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Report response data:', data);
+            if (data.success) {
+                this.showToast('Thank you for your report. We will review this complaint.', true);
+                // Disable report button after successful report
+                if (reportBtn) {
+                    reportBtn.disabled = true;
+                    reportBtn.innerHTML = '<i class="fas fa-check"></i> Reported';
+                }
+            } else {
+                console.error('Report failed:', data);
+                this.showToast(data.error || 'Failed to submit report. Please try again.', false);
+            }
+        })
+        .catch(error => {
+            console.error('Report error:', error);
+            this.showToast(`Network error: ${error.message}. Please try again.`, false);
+        })
+        .finally(() => {
+            // Reset button if not successfully reported
+            if (reportBtn && !reportBtn.innerHTML.includes('Reported')) {
+                reportBtn.disabled = false;
+                reportBtn.innerHTML = '<i class="fas fa-flag"></i> Report';
+            }
+        });
+    },
+
+    // Toggle comment like (placeholder for future implementation)
+    toggleCommentLike: function(commentId) {
+        console.log('Comment like clicked for comment:', commentId);
+        // TODO: Implement comment like functionality
+        this.showToast('Comment like feature will be implemented soon', true);
+    },
+
+    // Utility function to escape HTML
+    escapeHtml: function(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/\n/g, '<br>');
+    }
+};
+
+// Initialize the app when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing ComplaintApp...');
+    ComplaintApp.init();
+});
+
+// Legacy support - make functions available globally for any existing references
+window.handleReaction = ComplaintApp.handleReaction.bind(ComplaintApp);
+window.toggleReaction = ComplaintApp.handleReaction.bind(ComplaintApp);
+window.replyToComment = ComplaintApp.toggleReplyForm.bind(ComplaintApp);
+window.hideReplyForm = ComplaintApp.hideReplyForm.bind(ComplaintApp);
+window.shareComplaint = ComplaintApp.shareComplaint.bind(ComplaintApp);
+window.reportComplaint = ComplaintApp.reportComplaint.bind(ComplaintApp);
+window.showToast = ComplaintApp.showToast.bind(ComplaintApp);
+
+console.log('ComplaintApp setup complete');
+</script>
+{% endblock %}

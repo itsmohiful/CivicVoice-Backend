@@ -185,8 +185,7 @@ class ComplaintCommentForm(forms.ModelForm):
     
     def clean_content(self):
         content = self.cleaned_data.get('content')
-        if len(content.strip()) < 5:
-            raise ValidationError(_('Comment must be at least 5 characters long.'))
+       
         return content
 
 

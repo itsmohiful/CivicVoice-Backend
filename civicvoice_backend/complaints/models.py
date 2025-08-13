@@ -349,7 +349,7 @@ class ComplaintComment(BaseModel):
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='comments')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, 
                              related_name='replies')
-    content = models.TextField(_("Content"), validators=[MinLengthValidator(5)])
+    content = models.TextField(_("Content"), )
     is_official = models.BooleanField(_("Official Response"), default=False,
                                     help_text=_("Mark as official response from authority"))
     
@@ -365,7 +365,7 @@ class ComplaintComment(BaseModel):
         ]
     
     def __str__(self):
-        return f"Comment on {self.complaint.complaint_number} by {self.created_by.name if not self.is_anonymous else 'Anonymous'}"
+        return f"Comment on {self.complaint.complaint_number}"
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -4,194 +4,370 @@
 {% block title %}{{ complaint.title }} - CivicVoice{% endblock %}
 
 {% block extra_css %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
+    :root {
+        --primary-color: #4e73df;
+        --success-color: #1cc88a;
+        --info-color: #36b9cc;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --secondary-color: #6c757d;
+        --light-color: #f8f9fc;
+        --border-color: #e3e6f0;
+        --shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
     .complaint-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
         color: white;
         padding: 2rem 0;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        margin-bottom: 2rem;
     }
+
+    .card {
+        border: none;
+        box-shadow: var(--shadow);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background: var(--light-color);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+    }
+
     .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 500;
         font-size: 0.875rem;
-        padding: 0.375rem 0.75rem;
     }
+
     .priority-badge {
         display: inline-flex;
         align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
     }
-    .priority-indicator {
+
+    .priority-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        margin-right: 6px;
+        flex-shrink: 0;
     }
-    .info-card {
-        border: none;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+
+    .reaction-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
     }
+
     .reaction-btn {
-        border: 2px solid #e3e6f0;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
-        padding: 0.5rem 1rem;
-        border-radius: 25px;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        background: white;
+        border-radius: 50px;
         cursor: pointer;
+        transition: all 0.3s ease;
         font-size: 0.9rem;
         font-weight: 500;
-        position: relative;
-        overflow: hidden;
+        text-decoration: none;
+        color: var(--secondary-color);
     }
+
     .reaction-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        border-color: #4e73df;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
     }
-    .reaction-btn:active {
-        transform: translateY(0px);
-        animation: pulse 0.3s ease;
-    }
+
     .reaction-btn.active {
-        background: linear-gradient(135deg, #4e73df 0%, #667eea 100%);
+        background: var(--primary-color);
+        border-color: var(--primary-color);
         color: white;
-        border-color: #4e73df;
-        transform: translateY(-1px);
     }
-    .reaction-btn.active .reaction-emoji {
-        animation: bounce 0.5s ease;
-    }
+
     .reaction-emoji {
         font-size: 1.2rem;
-        display: inline-block;
-        margin-right: 0.25rem;
-        transition: transform 0.3s ease;
     }
-    .reaction-container {
-        flex-wrap: wrap;
-        gap: 0.75rem;
+
+    .comment-item {
+        border-left: 4px solid var(--border-color);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: var(--light-color);
+        border-radius: 0 0.5rem 0.5rem 0;
     }
-    .reaction-count {
-        min-width: 24px;
-        text-align: center;
+
+    .comment-item.reply {
+        margin-left: 2rem;
+        border-left-color: var(--info-color);
+        background: white;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .comment-author {
         font-weight: 600;
-        border-radius: 12px;
+        color: var(--primary-color);
+    }
+
+    .comment-time {
+        color: var(--secondary-color);
+        font-size: 0.875rem;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .btn-action {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        background: white;
+        color: var(--secondary-color);
+        text-decoration: none;
         transition: all 0.3s ease;
     }
-    .reaction-summary {
-        padding-top: 0.75rem;
-        border-top: 1px solid #e3e6f0;
+
+    .btn-action:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
     }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(0.95); }
-        100% { transform: scale(1); }
-    }
-    @keyframes bounce {
-        0%, 20%, 60%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-3px); }
-        80% { transform: translateY(-1px); }
-    }
-    .reaction-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none !important;
-    }
-    .comment-card {
-        border-left: 3px solid #e3e6f0;
-        padding-left: 1rem;
-        margin-bottom: 1rem;
-    }
-    .comment-card.reply {
-        margin-left: 2rem;
-        border-left-color: #4e73df;
-    }
-    .attachment-item {
-        border: 1px solid #e3e6f0;
-        border-radius: 0.35rem;
+
+    .reply-form {
+        margin-top: 1rem;
         padding: 1rem;
+        background: white;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+
+    .reply-count {
+        background: var(--info-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        margin-left: 0.25rem;
+    }
+
+    .reply-count-display {
+        margin-top: 0.5rem;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: between;
     }
+
     .timeline-item {
-        border-left: 2px solid #e3e6f0;
-        padding-left: 1.5rem;
-        margin-bottom: 1.5rem;
         position: relative;
+        padding-left: 2rem;
+        padding-bottom: 1.5rem;
+        border-left: 2px solid var(--border-color);
     }
-    .timeline-item::before {
-        content: '';
+
+    .timeline-item:last-child {
+        border-left: none;
+    }
+
+    .timeline-dot {
         position: absolute;
         left: -6px;
         top: 0;
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: #4e73df;
+        background: var(--primary-color);
+    }
+
+    .attachment-item {
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        background: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--secondary-color);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1055;
+    }
+
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+
+    .related-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: background-color 0.3s ease;
+    }
+
+    .related-item:hover {
+        background: var(--light-color);
+        color: inherit;
+    }
+
+    .related-item:last-child {
+        border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+        .complaint-header {
+            padding: 1rem 0;
+        }
+        
+        .reaction-container {
+            justify-content: center;
+        }
+        
+        .comment-item.reply {
+            margin-left: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Toast Container -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="commentToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="toast-container">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-            <i class="fas fa-comment text-primary me-2"></i>
-            <strong class="me-auto">Comment</strong>
+            <strong class="me-auto">Notification</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-            <!-- Toast message will be inserted here -->
+            <!-- Message will be inserted here -->
         </div>
     </div>
 </div>
 
 <div class="container-fluid">
-    
     <!-- Complaint Header -->
     <div class="complaint-header">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-8">
+                <div class="col-lg-8">
                     <h1 class="h3 mb-2">{{ complaint.title }}</h1>
-                    <p class="mb-0">
-                        <strong>Complaint #{{ complaint.complaint_number }}</strong>
-                        &bull; Filed {{ complaint.created_at|date:"M d, Y" }}
-                        {% if complaint.created_by %}
-                            &bull; By {{ complaint.created_by.name|default:complaint.created_by.username }}
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    {% if complaint.status == 'PENDING' %}
-                        <span class="badge bg-warning status-badge">
-                            <i class="fas fa-clock"></i> Pending Review
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-hashtag"></i> {{ complaint.complaint_number }}
                         </span>
-                    {% elif complaint.status == 'REVIEWED' %}
-                        <span class="badge bg-info status-badge">
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"M d, Y" }}
+                        </span>
+                        {% if complaint.created_by %}
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-user"></i> {{ complaint.created_by.name|default:complaint.created_by.username }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <!-- Status Badge -->
+                    {% if complaint.status == 'submitted' %}
+                        <span class="status-badge bg-warning text-dark">
+                            <i class="fas fa-clock"></i> Submitted
+                        </span>
+                    {% elif complaint.status == 'under_review' %}
+                        <span class="status-badge bg-info text-white">
                             <i class="fas fa-eye"></i> Under Review
                         </span>
-                    {% elif complaint.status == 'IN_PROGRESS' %}
-                        <span class="badge bg-primary status-badge">
+                    {% elif complaint.status == 'in_progress' %}
+                        <span class="status-badge bg-primary text-white">
                             <i class="fas fa-cog fa-spin"></i> In Progress
                         </span>
-                    {% elif complaint.status == 'RESOLVED' %}
-                        <span class="badge bg-success status-badge">
+                    {% elif complaint.status == 'resolved' %}
+                        <span class="status-badge bg-success text-white">
                             <i class="fas fa-check"></i> Resolved
                         </span>
-                    {% elif complaint.status == 'CLOSED' %}
-                        <span class="badge bg-secondary status-badge">
+                    {% elif complaint.status == 'closed' %}
+                        <span class="status-badge bg-secondary text-white">
                             <i class="fas fa-times"></i> Closed
                         </span>
-                    {% elif complaint.status == 'REJECTED' %}
-                        <span class="badge bg-danger status-badge">
+                    {% elif complaint.status == 'rejected' %}
+                        <span class="status-badge bg-danger text-white">
                             <i class="fas fa-ban"></i> Rejected
                         </span>
                     {% endif %}
@@ -200,898 +376,1092 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <div>
-            <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Complaints
-            </a>
-            {% if user.is_authenticated and complaint.created_by == user %}
-                <a href="{% url 'complaints:update' complaint.complaint_number %}" class="btn btn-outline-primary">
-                    <i class="fas fa-edit"></i> Edit
+    <div class="container">
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Complaints
                 </a>
-            {% endif %}
-        </div>
-        <div>
-            {% if complaint.allow_sharing %}
-                <button class="btn btn-outline-info share-btn">
+                {% if user.is_authenticated and complaint.created_by == user %}
+                    <a href="{% url 'complaints:update' complaint.complaint_number %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <button class="btn btn-outline-info" id="followBtn" data-following="{{ is_following|yesno:'true,false' }}">
+                        <i class="fas fa-bell"></i> 
+                        <span class="follow-text">{{ is_following|yesno:'Following,Follow' }}</span>
+                    </button>
+                {% endif %}
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-success" id="shareBtn">
                     <i class="fas fa-share"></i> Share
                 </button>
-            {% endif %}
-            <button class="btn btn-outline-warning report-btn">
-                <i class="fas fa-flag"></i> Report
-            </button>
+                <button class="btn btn-outline-warning" id="reportBtn">
+                    <i class="fas fa-flag"></i> Report
+                </button>
+            </div>
         </div>
-    </div>
 
-    <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            
-            <!-- Complaint Details -->
-            <div class="card info-card mb-4">
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Category</h6>
-                            <span class="badge bg-primary">{{ complaint.category.name }}</span>
-                            {% if complaint.subcategory %}
-                                <span class="badge bg-secondary">{{ complaint.subcategory.name }}</span>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <h6 class="text-muted mb-1">Priority</h6>
-                            <span class="priority-badge">
-                                {% if complaint.priority == 'LOW' %}
-                                    <span class="priority-indicator" style="background-color: #1cc88a;"></span>
-                                    <span class="badge bg-success">Low Priority</span>
-                                {% elif complaint.priority == 'MEDIUM' %}
-                                    <span class="priority-indicator" style="background-color: #f6c23e;"></span>
-                                    <span class="badge bg-warning">Medium Priority</span>
-                                {% elif complaint.priority == 'HIGH' %}
-                                    <span class="priority-indicator" style="background-color: #e74a3b;"></span>
-                                    <span class="badge bg-danger">High Priority</span>
-                                {% elif complaint.priority == 'CRITICAL' %}
-                                    <span class="priority-indicator" style="background-color: #dc3545;"></span>
-                                    <span class="badge bg-danger">Critical</span>
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Complaint Details Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle text-primary"></i>
+                        Complaint Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-1">Category</h6>
+                                <span class="badge bg-primary">{{ complaint.category.name }}</span>
+                                {% if complaint.subcategory %}
+                                    <span class="badge bg-secondary">{{ complaint.subcategory.name }}</span>
                                 {% endif %}
-                            </span>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-1">Priority</h6>
+                                {% if complaint.priority == 'low' %}
+                                    <span class="priority-badge bg-success text-white">
+                                        <span class="priority-dot" style="background-color: #1cc88a;"></span>
+                                        Low Priority
+                                    </span>
+                                {% elif complaint.priority == 'medium' %}
+                                    <span class="priority-badge bg-warning text-dark">
+                                        <span class="priority-dot" style="background-color: #f6c23e;"></span>
+                                        Medium Priority
+                                    </span>
+                                {% elif complaint.priority == 'high' %}
+                                    <span class="priority-badge bg-danger text-white">
+                                        <span class="priority-dot" style="background-color: #e74a3b;"></span>
+                                        High Priority
+                                    </span>
+                                {% elif complaint.priority == 'urgent' %}
+                                    <span class="priority-badge bg-danger text-white">
+                                        <span class="priority-dot" style="background-color: #dc3545;"></span>
+                                        Urgent
+                                    </span>
+                                {% elif complaint.priority == 'critical' %}
+                                    <span class="priority-badge bg-dark text-white">
+                                        <span class="priority-dot" style="background-color: #343a40;"></span>
+                                        Critical
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Description</h6>
+                            <div class="content">{{ complaint.description|linebreaks }}</div>
+                        </div>
+                        
+                        {% if complaint.incident_date %}
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-1">Incident Date</h6>
+                                <p class="mb-0">
+                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                    {{ complaint.incident_date|date:"F d, Y" }}
+                                </p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if complaint.tags.exists %}
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Tags</h6>
+                                {% for tag in complaint.tags.all %}
+                                    <span class="badge me-1" style="background-color: {{ tag.color }}; color: white;">
+                                        {{ tag.name }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Location Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        Location Information
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Country:</strong> 
+                                    <span class="text-muted">{{ complaint.country|default:"Not specified" }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>State:</strong> 
+                                    <span class="text-muted">{{ complaint.state|default:"Not specified" }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>City:</strong> 
+                                    <span class="text-muted">{{ complaint.city|default:"Not specified" }}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                {% if complaint.area %}
+                                    <p class="mb-2">
+                                        <strong>Area:</strong> 
+                                        <span class="text-muted">{{ complaint.area }}</span>
+                                    </p>
+                                {% endif %}
+                                {% if complaint.address %}
+                                    <p class="mb-2">
+                                        <strong>Address:</strong> 
+                                        <span class="text-muted">{{ complaint.address }}</span>
+                                    </p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Description</h6>
-                        <p class="mb-0">{{ complaint.description|linebreaks }}</p>
-                    </div>
-                    
-                    {% if complaint.incident_date %}
-                        <div class="mb-3">
-                            <h6 class="text-muted mb-1">Incident Date</h6>
-                            <p class="mb-0">{{ complaint.incident_date|date:"F d, Y" }}</p>
+                </div>
+
+                <!-- Attachments Card -->
+                {% if complaint.attachments.exists %}
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-paperclip text-primary"></i>
+                            Attachments ({{ complaint.attachments.count }})
                         </div>
-                    {% endif %}
-                    
-                    {% if complaint.tags.exists %}
-                        <div class="mb-3">
-                            <h6 class="text-muted mb-2">Tags</h6>
-                            {% for tag in complaint.tags.all %}
-                                <span class="badge" style="background-color: {{ tag.color }};">
-                                    {{ tag.name }}
-                                </span>
+                        <div class="card-body">
+                            {% for attachment in complaint.attachments.all %}
+                                <div class="attachment-item">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file text-muted me-2"></i>
+                                        <div>
+                                            <strong>{{ attachment.original_name }}</strong>
+                                            <small class="text-muted d-block">
+                                                {{ attachment.file_size|filesizeformat }} • {{ attachment.file_type }}
+                                            </small>
+                                            {% if attachment.description %}
+                                                <small class="text-muted">{{ attachment.description }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
                             {% endfor %}
                         </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Location Information -->
-            <div class="card info-card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-map-marker-alt text-primary"></i> Location
-                    </h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>City:</strong> {{ complaint.city }}</p>
-                            <p class="mb-1"><strong>State:</strong> {{ complaint.state }}</p>
-                            <p class="mb-1"><strong>Country:</strong> {{ complaint.country }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            {% if complaint.area %}
-                                <p class="mb-1"><strong>Area:</strong> {{ complaint.area }}</p>
-                            {% endif %}
-                            {% if complaint.address %}
-                                <p class="mb-1"><strong>Address:</strong> {{ complaint.address }}</p>
-                            {% endif %}
-                        </div>
                     </div>
-                </div>
-            </div>
+                {% endif %}
 
-            <!-- Attachments -->
-            {% if complaint.attachments.exists %}
-                <div class="card info-card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-paperclip text-primary"></i> Attachments
-                        </h5>
-                        {% for attachment in complaint.attachments.all %}
-                            <div class="attachment-item">
-                                <div>
-                                    <i class="fas fa-file text-muted"></i>
-                                    <strong>{{ attachment.file_name }}</strong>
-                                    <small class="text-muted">({{ attachment.file_size|filesizeformat }})</small>
-                                    {% if attachment.description %}
-                                        <br><small>{{ attachment.description }}</small>
-                                    {% endif %}
-                                </div>
-                                <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                    <i class="fas fa-download"></i> Download
-                                </a>
+                <!-- Reactions Card -->
+                {% if user.is_authenticated %}
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-heart text-primary"></i>
+                            Community Response
+                        </div>
+                        <div class="card-body">
+                            <div class="reaction-container">
+                                <button class="reaction-btn{% if user_reaction.reaction_type == 'like' %} active{% endif %}" 
+                                        data-type="like">
+                                    <span class="reaction-emoji">👍</span>
+                                    <span>Like</span>
+                                    <span class="badge bg-primary ms-1" id="like-count">{{ complaint.like_count }}</span>
+                                </button>
+                                <button class="reaction-btn{% if user_reaction.reaction_type == 'support' %} active{% endif %}" 
+                                        data-type="support">
+                                    <span class="reaction-emoji">❤️</span>
+                                    <span>Support</span>
+                                    <span class="badge bg-danger ms-1" id="support-count">{{ complaint.support_count }}</span>
+                                </button>
+                                <button class="reaction-btn{% if user_reaction.reaction_type == 'concern' %} active{% endif %}" 
+                                        data-type="concern">
+                                    <span class="reaction-emoji">😟</span>
+                                    <span>Concern</span>
+                                    <span class="badge bg-warning ms-1" id="concern-count">{{ complaint.concern_count }}</span>
+                                </button>
+                                <button class="reaction-btn{% if user_reaction.reaction_type == 'angry' %} active{% endif %}" 
+                                        data-type="angry">
+                                    <span class="reaction-emoji">😠</span>
+                                    <span>Angry</span>
+                                    <span class="badge bg-danger ms-1" id="angry-count">{{ complaint.angry_count }}</span>
+                                </button>
+                                <button class="reaction-btn{% if user_reaction.reaction_type == 'sad' %} active{% endif %}" 
+                                        data-type="sad">
+                                    <span class="reaction-emoji">😢</span>
+                                    {% comment %} <span>Sad</span> {% endcomment %}
+                                    {% comment %} <span class="badge bg-info ms-1" id="sad-count">{{ complaint.sad_count }}</span> {% endcomment %}
+                                    <span class="badge bg-info ms-1" id="sad-count"></span>
+                                </button>
                             </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- Reactions -->
-            {% if user.is_authenticated %}
-                <div class="card info-card mb-4">
-                    <div class="card-body">
-                        <h6 class="card-title mb-3">
-                            <span class="reaction-emoji">🤝</span> Community Response
-                        </h6>
-                        <div class="reaction-container d-flex flex-wrap gap-2 mb-3">
-                            <button class="reaction-btn btn" data-type="like">
-                                <span class="reaction-emoji">👍</span>
-                                <span class="reaction-text">Like</span>
-                                <span class="reaction-count badge bg-primary ms-1">{{ complaint.like_count|default:0 }}</span>
-                            </button>
-                            <button class="reaction-btn btn" data-type="support">
-                                <span class="reaction-emoji">❤️</span>
-                                <span class="reaction-text">Support</span>
-                                <span class="reaction-count badge bg-danger ms-1">{{ complaint.support_count|default:0 }}</span>
-                            </button>
-                            <button class="reaction-btn btn" data-type="concern">
-                                <span class="reaction-emoji">😟</span>
-                                <span class="reaction-text">Concern</span>
-                                <span class="reaction-count badge bg-warning ms-1">{{ complaint.concern_count|default:0 }}</span>
-                            </button>
-                            <button class="reaction-btn btn" data-type="angry">
-                                <span class="reaction-emoji">😠</span>
-                                <span class="reaction-text">Angry</span>
-                                <span class="reaction-count badge bg-danger ms-1">{{ complaint.angry_count|default:0 }}</span>
-                            </button>
-                            <button class="reaction-btn btn" data-type="sad">
-                                <span class="reaction-emoji">😢</span>
-                                <span class="reaction-text">Sad</span>
-                                <span class="reaction-count badge bg-info ms-1">{{ complaint.sad_count|default:0 }}</span>
-                            </button>
-                        </div>
-                        <div class="reaction-summary">
-                            <small class="text-muted">
-                                <span class="reaction-emoji">📊</span>
-                                Total: <strong>{{ complaint.total_reactions|default:0 }}</strong> reaction{{ complaint.total_reactions|pluralize }}
-                            </small>
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fas fa-chart-bar"></i>
+                                    Total reactions: <strong id="total-reactions">{{ complaint.total_reactions }}</strong>
+                                </small>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
 
-            <!-- Comments Section -->
-            {% if complaint.allow_comments %}
-                <div class="card info-card mb-4">
+                <!-- Comments Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="fas fa-comments text-primary"></i>
+                            Comments (<span id="comment-count">{{ complaint.comments.count }}</span>)
+                        </span>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-comments text-primary"></i> 
-                            Comments ({{ complaint.comments.count }})
-                        </h5>
-                        
+                        <!-- Comment Form -->
                         {% if user.is_authenticated %}
                             <form id="commentForm" class="mb-4">
                                 {% csrf_token %}
-                                <div class="mb-3">
-                                    <textarea name="content" id="commentContent" class="form-control" rows="3" 
-                                              placeholder="Share your thoughts or provide additional information..." required></textarea>
+                                <div class="form-floating">
+                                    <textarea class="form-control" 
+                                              id="commentContent" 
+                                              name="content" 
+                                              placeholder="Share your thoughts..." 
+                                              style="height: 100px" 
+                                              required></textarea>
+                                    <label for="commentContent">Share your thoughts or provide additional information...</label>
                                 </div>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="commentSubmitBtn">
                                     <i class="fas fa-comment"></i> Add Comment
                                 </button>
                             </form>
                         {% endif %}
                         
                         <!-- Comments List -->
-                        {% for comment in complaint.comments.all %}
-                            <div class="comment-card">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <strong>{{ comment.created_by.name|default:comment.created_by.username }}</strong>
-                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                        <div id="comments-container">
+                            {% for comment in comments %}
+                                <div class="comment-item" data-comment-id="{{ comment.id }}">
+                                    <div class="comment-header">
+                                        <div>
+                                            <span class="comment-author">
+                                                {% if comment.created_by %}
+                                                    {{ comment.created_by.name|default:comment.created_by.username }}
+                                                {% else %}
+                                                    Anonymous
+                                                {% endif %}
+                                            </span>
+                                            <span class="comment-time">
+                                                <i class="fas fa-clock"></i>
+                                                {{ comment.created_at|timesince }} ago
+                                            </span>
+                                            {% if comment.is_official %}
+                                                <span class="badge bg-success ms-2">
+                                                    <i class="fas fa-certificate"></i> Official
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="comment-content">
+                                        {{ comment.content|linebreaks }}
                                     </div>
                                     {% if user.is_authenticated %}
-                                        <button class="btn btn-sm btn-outline-secondary reply-btn" data-comment-id="{{ comment.id }}">
-                                            <i class="fas fa-reply"></i> Reply
-                                        </button>
+                                        <div class="comment-actions">
+                                            <button class="btn-action reply-btn" data-comment-id="{{ comment.id }}">
+                                                <i class="fas fa-reply"></i> Reply
+                                                {% if comment.replies.count > 0 %}
+                                                    <span class="reply-count"> [{{ comment.replies.count }}]</span>
+                                                {% endif %}
+                                            </button>
+                                            {% comment %} <button class="btn-action like-btn" data-comment-id="{{ comment.id }}">
+                                                <i class="fas fa-thumbs-up"></i> 
+                                                <span class="like-count">{{ comment.reactions.count }}</span>
+                                            </button> {% endcomment %}
+                                        </div>
                                     {% endif %}
-                                </div>
-                                <p class="mb-2">{{ comment.content|linebreaks }}</p>
-                                
-                                {% if user.is_authenticated %}
-                                    <div class="d-flex align-items-center">
-                                        <button class="btn btn-sm btn-outline-primary" onclick="toggleCommentReaction({{ comment.id }}, 'LIKE')">
-                                            <i class="fas fa-thumbs-up"></i> {{ comment.like_count }}
-                                        </button>
+                                    
+                                    <!-- Reply Count Display -->
+                                    {% if comment.replies.count > 0 %}
+                                        <div class="reply-count-display">
+                                            <small class="text-muted">
+                                                <i class="fas fa-comments"></i>
+                                                <span id="reply-count-{{ comment.id }}">{{ comment.replies.count }}</span> 
+                                                {{ comment.replies.count|pluralize:"reply,replies" }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Reply Form -->
+                                    <div class="reply-form" id="reply-form-{{ comment.id }}">
+                                        <form class="reply-form-submit" data-comment-id="{{ comment.id }}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                                            <div class="form-floating mb-3">
+                                                <textarea class="form-control" 
+                                                          name="content" 
+                                                          placeholder="Write a reply..." 
+                                                          style="height: 80px" 
+                                                          required></textarea>
+                                                <label>Reply to {% if comment.created_by %}{{ comment.created_by.name|default:comment.created_by.username }}{% else %}Anonymous{% endif %}...</label>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-reply"></i> Reply
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-secondary cancel-reply" data-comment-id="{{ comment.id }}">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
-                                {% endif %}
-                                
-                                <!-- Replies -->
-                                {% for reply in comment.replies.all %}
-                                    <div class="comment-card reply">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <strong>{{ reply.created_by.name|default:reply.created_by.username }}</strong>
-                                                <small class="text-muted">{{ reply.created_at|timesince }} ago</small>
+                                    
+                                    <!-- Replies -->
+                                    {% for reply in comment.replies.all %}
+                                        <div class="comment-item reply">
+                                            <div class="comment-header">
+                                                <div>
+                                                    <span class="comment-author">
+                                                        {% if reply.created_by %}
+                                                            {{ reply.created_by.name|default:reply.created_by.username }}
+                                                        {% else %}
+                                                            Anonymous
+                                                        {% endif %}
+                                                    </span>
+                                                    <span class="comment-time">
+                                                        <i class="fas fa-clock"></i>
+                                                        {{ reply.created_at|timesince }} ago
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="comment-content">
+                                                {{ reply.content|linebreaks }}
                                             </div>
                                         </div>
-                                        <p class="mb-0">{{ reply.content|linebreaks }}</p>
-                                    </div>
-                                {% endfor %}
-                                
-                                <!-- Reply Form (hidden by default) -->
-                                <div id="reply-form-{{ comment.id }}" class="reply-form mt-3" style="display: none;">
-                                    <form class="reply-form-ajax" data-comment-id="{{ comment.id }}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="parent_comment" value="{{ comment.id }}">
-                                        <div class="mb-3">
-                                            <textarea name="content" class="form-control" rows="2" 
-                                                      placeholder="Reply to {{ comment.created_by.name|default:comment.created_by.username }}..." required></textarea>
-                                        </div>
-                                        <div class="d-flex gap-2">
-                                            <button type="submit" class="btn btn-sm btn-primary">Reply</button>
-                                            <button type="button" class="btn btn-sm btn-secondary cancel-reply-btn" data-comment-id="{{ comment.id }}">Cancel</button>
-                                        </div>
-                                    </form>
+                                    {% endfor %}
                                 </div>
-                            </div>
-                        {% empty %}
-                            <p class="text-muted">No comments yet. Be the first to share your thoughts!</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            
-            <!-- Status Timeline -->
-            <div class="card info-card mb-4">
-                <div class="card-body">
-                    <h6 class="card-title">Status Timeline</h6>
-                    
-                    <div class="timeline-item">
-                        <h6 class="mb-1">Complaint Submitted</h6>
-                        <small class="text-muted">{{ complaint.created_at|date:"M d, Y g:i A" }}</small>
-                    </div>
-                    
-                    {% for update in complaint.status_updates.all %}
-                        <div class="timeline-item">
-                            <h6 class="mb-1">{{ update.get_status_display }}</h6>
-                            <small class="text-muted">{{ update.created_at|date:"M d, Y g:i A" }}</small>
-                            {% if update.note %}
-                                <p class="mb-0 mt-1"><small>{{ update.note }}</small></p>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="card info-card mb-4">
-                <div class="card-body">
-                    <h6 class="card-title">Engagement Stats</h6>
-                    
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <h4 class="text-primary">{{ complaint.view_count }}</h4>
-                            <small class="text-muted">Views</small>
-                        </div>
-                        <div class="col-4">
-                            <h4 class="text-success">{{ complaint.total_reactions }}</h4>
-                            <small class="text-muted">Reactions</small>
-                        </div>
-                        <div class="col-4">
-                            <h4 class="text-info">{{ complaint.comments.count }}</h4>
-                            <small class="text-muted">Comments</small>
+                            {% empty %}
+                                <div class="text-center text-muted py-4" id="no-comments">
+                                    <i class="fas fa-comments fa-3x mb-3"></i>
+                                    <h5>No comments yet</h5>
+                                    <p>Be the first to share your thoughts!</p>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Related Complaints -->
-            {% if related_complaints %}
-                <div class="card info-card">
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Stats Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar text-primary"></i>
+                        Engagement Stats
+                    </div>
                     <div class="card-body">
-                        <h6 class="card-title">Similar Complaints</h6>
-                        {% for related in related_complaints %}
-                            <div class="border-bottom pb-2 mb-2">
-                                <a href="{% url 'complaints:detail' related.complaint_number %}" class="text-decoration-none">
-                                    <h6 class="mb-1">{{ related.title|truncatechars:50 }}</h6>
-                                </a>
-                                <small class="text-muted">
-                                    {{ related.created_at|date:"M d" }} &bull; {{ related.category.name }}
-                                </small>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number text-primary">{{ complaint.view_count }}</div>
+                                <div class="stat-label">Views</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number text-success" id="sidebar-reactions">{{ complaint.total_reactions }}</div>
+                                <div class="stat-label">Reactions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number text-info" id="sidebar-comments">{{ complaint.comments.count }}</div>
+                                <div class="stat-label">Comments</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number text-warning">{{ complaint.share_count|default:0 }}</div>
+                                <div class="stat-label">Shares</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Timeline Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-history text-primary"></i>
+                        Status Timeline
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <h6 class="mb-1">Complaint Submitted</h6>
+                            <small class="text-muted">{{ complaint.created_at|date:"M d, Y g:i A" }}</small>
+                        </div>
+                        
+                        {% for history in complaint.status_history.all %}
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <h6 class="mb-1">{{ history.get_new_status_display }}</h6>
+                                <small class="text-muted">{{ history.created_at|date:"M d, Y g:i A" }}</small>
+                                {% if history.reason %}
+                                    <p class="mb-0 mt-1"><small>{{ history.reason }}</small></p>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
                 </div>
-            {% endif %}
+
+                <!-- Related Complaints Card -->
+                {% if related_complaints %}
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-link text-primary"></i>
+                            Similar Complaints
+                        </div>
+                        <div class="card-body p-0">
+                            {% for related in related_complaints %}
+                                <a href="{% url 'complaints:detail' related.complaint_number %}" class="related-item">
+                                    <h6 class="mb-1">{{ related.title|truncatechars:50 }}</h6>
+                                    <small class="text-muted">
+                                        {{ related.created_at|date:"M d" }} • {{ related.category.name }}
+                                        <span class="badge bg-{{ related.status }} ms-1">{{ related.get_status_display }}</span>
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block javascript %}
+{{ block.super }}
 <script>
-// Debug: Log that script is loaded - Cache busting: {{ "now"|date:"U" }}
-console.log('Complaint detail script loaded - Version: {{ "now"|date:"U" }}');
-
-// Global functions object to organize everything
+// Main application object
 const ComplaintApp = {
-    // Show toast notification
-    showToast: function(message, isSuccess = true) {
-        console.log('showToast called:', message, isSuccess);
-        const toast = document.getElementById('commentToast');
-        if (!toast) {
-            console.warn('Toast element not found');
-            alert(message); // Fallback
-            return;
+    // Configuration
+    config: {
+        complaintNumber: '{{ complaint.complaint_number }}',
+        csrfToken: null, // Will be set in init()
+        isAuthenticated: {{ user.is_authenticated|yesno:'true,false' }},
+        userId: {{ user.id|default:'null' }}
+    },
+
+    // Get CSRF token dynamically
+    getCSRFToken() {
+        if (!this.config.csrfToken) {
+            const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (tokenElement) {
+                this.config.csrfToken = tokenElement.value;
+            } else {
+                console.error('CSRF token not found in DOM');
+                return null;
+            }
         }
+        return this.config.csrfToken;
+    },
+
+    // Initialize the application
+    init() {
+        console.log('Initializing ComplaintApp...');
         
+        // Set CSRF token
+        this.config.csrfToken = this.getCSRFToken();
+        console.log('CSRF token set:', this.config.csrfToken ? 'Found' : 'Not found');
+        
+        this.bindEvents();
+        this.initializeTooltips();
+        console.log('ComplaintApp initialized successfully');
+    },
+
+    // Bind all event listeners
+    bindEvents() {
+        // Reaction buttons
+        document.querySelectorAll('.reaction-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleReaction(e));
+        });
+
+        // Comment form submission
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', (e) => this.submitComment(e));
+        }
+
+        // Reply buttons
+        document.querySelectorAll('.reply-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.toggleReplyForm(e));
+        });
+
+        // Cancel reply buttons
+        document.querySelectorAll('.cancel-reply').forEach(btn => {
+            btn.addEventListener('click', (e) => this.cancelReply(e));
+        });
+
+        // Reply form submissions
+        document.querySelectorAll('.reply-form-submit').forEach(form => {
+            form.addEventListener('submit', (e) => this.submitReply(e));
+        });
+
+        // Action buttons
+        const shareBtn = document.getElementById('shareBtn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => this.shareComplaint());
+        }
+
+        const reportBtn = document.getElementById('reportBtn');
+        if (reportBtn) {
+            reportBtn.addEventListener('click', () => this.reportComplaint());
+        }
+
+        const followBtn = document.getElementById('followBtn');
+        if (followBtn) {
+            followBtn.addEventListener('click', () => this.toggleFollow());
+        }
+
+        // Comment like buttons
+        document.querySelectorAll('.like-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.toggleCommentLike(e));
+        });
+    },
+
+    // Initialize Bootstrap tooltips
+    initializeTooltips() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    },
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
         const toastBody = toast.querySelector('.toast-body');
         const toastHeader = toast.querySelector('.toast-header');
         
-        // Update toast content
-        if (toastBody) toastBody.textContent = message;
+        toastBody.textContent = message;
         
-        // Update toast style based on success/error
-        if (isSuccess) {
-            toast.className = 'toast';
-            if (toastHeader) toastHeader.className = 'toast-header bg-success text-white';
-        } else {
-            toast.className = 'toast';
-            if (toastHeader) toastHeader.className = 'toast-header bg-danger text-white';
-        }
+        // Update toast styling based on type
+        toast.className = `toast ${type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'}`;
         
-        // Show toast
-        try {
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-        } catch (e) {
-            console.error('Bootstrap toast error:', e);
-            alert(message); // Fallback
-        }
+        const bsToast = new bootstrap.Toast(toast, {
+            autohide: true,
+            delay: type === 'success' ? 3000 : 5000
+        });
+        bsToast.show();
     },
 
     // Handle reaction button clicks
-    handleReaction: function(reactionType) {
-        console.log('handleReaction called with:', reactionType);
+    async handleReaction(e) {
+        e.preventDefault();
         
-        if (!reactionType) {
-            console.error('Reaction type is required');
-            ComplaintApp.showToast('Invalid reaction type', false);
+        if (!this.config.isAuthenticated) {
+            this.showToast('Please log in to react to complaints', 'error');
             return;
         }
-        
-        // Get CSRF token
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (!csrfToken) {
-            console.error('CSRF token not found');
-            ComplaintApp.showToast('Security token not found. Please refresh the page.', false);
-            return;
-        }
+
+        const button = e.currentTarget;
+        const reactionType = button.dataset.type;
         
         // Show loading state
-        const reactionBtn = document.querySelector(`[data-type="${reactionType}"]`);
-        if (reactionBtn) {
-            reactionBtn.disabled = true;
-            reactionBtn.style.opacity = '0.6';
-        }
+        button.classList.add('loading');
         
-        // AJAX call to toggle reaction
-        fetch('{% url "complaints:toggle_reaction" complaint.complaint_number %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken.value
-            },
-            body: JSON.stringify({
-                reaction_type: reactionType
-            })
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
+        try {
+            const response = await fetch(`/complaints/${this.config.complaintNumber}/react/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({ reaction_type: reactionType })
+            });
+
+            const data = await response.json();
+            
             if (data.success) {
-                // Update reaction count dynamically
-                ComplaintApp.updateReactionCount(reactionType, data.count || 0, data.user_reacted || false);
-                ComplaintApp.showToast(data.user_reacted ? `You ${reactionType}d this complaint!` : `${reactionType} removed`, true);
+                this.updateReactionUI(reactionType, data.count, data.user_reacted);
+                this.showToast(
+                    data.user_reacted ? 
+                        `You reacted with ${reactionType}!` : 
+                        `${reactionType} reaction removed`
+                );
             } else {
-                console.error('Reaction toggle failed:', data);
-                ComplaintApp.showToast(data.error || 'Failed to update reaction', false);
+                this.showToast(data.error || 'Failed to update reaction', 'error');
             }
-        })
-        .catch(error => {
-            console.error('Error in handleReaction:', error);
-            ComplaintApp.showToast('Network error. Please check your connection and try again.', false);
-        })
-        .finally(() => {
-            // Reset loading state
-            if (reactionBtn) {
-                reactionBtn.disabled = false;
-                reactionBtn.style.opacity = '1';
-            }
-        });
+        } catch (error) {
+            console.error('Reaction error:', error);
+            this.showToast('Network error. Please try again.', 'error');
+        } finally {
+            button.classList.remove('loading');
+        }
     },
 
-    // Update reaction count in real-time
-    updateReactionCount: function(reactionType, newCount, userReacted) {
-        const reactionBtn = document.querySelector(`[data-type="${reactionType}"]`);
-        if (reactionBtn) {
-            const countBadge = reactionBtn.querySelector('.reaction-count');
-            if (countBadge) {
-                countBadge.textContent = newCount;
-            }
-            
-            // Toggle active state
-            if (userReacted) {
-                reactionBtn.classList.add('active');
-            } else {
-                reactionBtn.classList.remove('active');
-            }
+    // Update reaction UI
+    updateReactionUI(reactionType, newCount, userReacted) {
+        const button = document.querySelector(`[data-type="${reactionType}"]`);
+        if (!button) return;
+
+        // Update count
+        const countBadge = button.querySelector('.badge');
+        if (countBadge) {
+            countBadge.textContent = newCount;
         }
-        
-        // Update total count
-        ComplaintApp.updateTotalReactions();
+
+        // Update active state
+        button.classList.toggle('active', userReacted);
+
+        // Update total reactions
+        this.updateTotalReactions();
     },
 
     // Update total reaction count
-    updateTotalReactions: function() {
+    updateTotalReactions() {
         let total = 0;
-        document.querySelectorAll('.reaction-count').forEach(badge => {
+        document.querySelectorAll('.reaction-btn .badge').forEach(badge => {
             total += parseInt(badge.textContent) || 0;
         });
-        
-        const totalElement = document.querySelector('.reaction-summary strong');
+
+        const totalElement = document.getElementById('total-reactions');
         if (totalElement) {
             totalElement.textContent = total;
         }
+
+        const sidebarElement = document.getElementById('sidebar-reactions');
+        if (sidebarElement) {
+            sidebarElement.textContent = total;
+        }
     },
 
-    // Show/hide reply form
-    replyToComment: function(commentId) {
-        console.log('replyToComment called with:', commentId);
-        const replyForm = document.getElementById(`reply-form-${commentId}`);
-        if (replyForm) {
-            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
-        } else {
-            console.error('Reply form not found for comment:', commentId);
+    // Submit main comment
+    async submitComment(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('commentSubmitBtn');
+        const textarea = document.getElementById('commentContent');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Posting...';
+        
+        try {
+            const response = await fetch(`/complaints/${this.config.complaintNumber}/comment/`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showToast('Comment added successfully!');
+                textarea.value = '';
+                this.addCommentToDOM(data.comment);
+                this.updateCommentCount(1);
+                this.hideNoCommentsMessage();
+            } else {
+                this.showToast(data.error || 'Failed to add comment', 'error');
+            }
+        } catch (error) {
+            console.error('Comment error:', error);
+            this.showToast('Network error. Please try again.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-comment"></i> Add Comment';
         }
+    },
+
+    // Submit reply
+    async submitReply(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const commentId = form.dataset.commentId;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const textarea = form.querySelector('textarea');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Replying...';
+        
+        try {
+            const response = await fetch(`/complaints/${this.config.complaintNumber}/comment/`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showToast('Reply added successfully!');
+                textarea.value = '';
+                this.hideReplyForm(commentId);
+                this.addReplyToDOM(data.comment, commentId);
+                this.updateCommentCount(1);
+            } else {
+                console.error('Failed to add reply:', data);
+                this.showToast(data.error || 'Failed to add reply', 'error');
+            }
+        } catch (error) {
+            console.error('Reply error:', error);
+            this.showToast('Network error. Please try again.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-reply"></i> Reply';
+        }
+    },
+
+    // Toggle reply form
+    toggleReplyForm(e) {
+        e.preventDefault();
+        const commentId = e.target.closest('.reply-btn').dataset.commentId;
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        
+        if (replyForm) {
+            const isVisible = replyForm.style.display === 'block';
+            replyForm.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                const textarea = replyForm.querySelector('textarea');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 100);
+                }
+            }
+        }
+    },
+
+    // Cancel reply
+    cancelReply(e) {
+        e.preventDefault();
+        const commentId = e.target.dataset.commentId;
+        this.hideReplyForm(commentId);
     },
 
     // Hide reply form
-    hideReplyForm: function(commentId) {
+    hideReplyForm(commentId) {
         const replyForm = document.getElementById(`reply-form-${commentId}`);
         if (replyForm) {
             replyForm.style.display = 'none';
-        }
-    },
-
-    // Share complaint
-    shareComplaint: function() {
-        if (navigator.share) {
-            navigator.share({
-                title: '{{ complaint.title }}',
-                text: '{{ complaint.description|truncatechars:100 }}',
-                url: window.location.href
-            });
-        } else {
-            // Fallback to copy URL
-            navigator.clipboard.writeText(window.location.href);
-            alert('Link copied to clipboard!');
-        }
-    },
-
-    // Report complaint
-    reportComplaint: function() {
-        if (confirm('Are you sure you want to report this complaint as inappropriate?')) {
-            fetch('{% url "complaints:report_complaint" complaint.complaint_number %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    ComplaintApp.showToast('Thank you for your report. We will review this complaint.', true);
-                } else {
-                    ComplaintApp.showToast('Failed to submit report. Please try again.', false);
-                }
-            })
-            .catch(error => {
-                console.error('Error reporting complaint:', error);
-                ComplaintApp.showToast('Network error. Please try again.', false);
-            });
+            const textarea = replyForm.querySelector('textarea');
+            if (textarea) {
+                textarea.value = '';
+            }
         }
     },
 
     // Add comment to DOM
-    addCommentToDOM: function(comment, isReply = false, parentCommentId = null) {
-        const commentsContainer = document.querySelector('.comment-card').parentElement;
-        
+    addCommentToDOM(commentData) {
+        const container = document.getElementById('comments-container');
         const commentHtml = `
-            <div class="comment-card ${isReply ? 'reply' : ''}">
-                <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="comment-item" data-comment-id="${commentData.id}">
+                <div class="comment-header">
                     <div>
-                        <strong>${comment.author || 'Anonymous'}</strong>
-                        <small class="text-muted">just now</small>
+                        <span class="comment-author">${this.escapeHtml(commentData.author || 'Anonymous')}</span>
+                        <span class="comment-time">
+                            <i class="fas fa-clock"></i>
+                            just now
+                        </span>
                     </div>
-                    <button class="btn btn-sm btn-outline-secondary reply-btn" data-comment-id="${comment.comment_id}">
-                        <i class="fas fa-reply"></i> Reply
-                    </button>
                 </div>
-                <p class="mb-2">${comment.content}</p>
-                
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-sm btn-outline-primary" onclick="toggleCommentReaction(${comment.comment_id}, 'LIKE')">
-                        <i class="fas fa-thumbs-up"></i> 0
-                    </button>
-                </div>
-                
-                <!-- Reply Form (hidden by default) -->
-                <div id="reply-form-${comment.comment_id}" class="reply-form mt-3" style="display: none;">
-                    <form class="reply-form-ajax" data-comment-id="${comment.comment_id}">
-                        <input type="hidden" name="csrfmiddlewaretoken" value="${document.querySelector('[name=csrfmiddlewaretoken]').value}">
-                        <input type="hidden" name="parent_comment" value="${comment.comment_id}">
-                        <div class="mb-3">
-                            <textarea name="content" class="form-control" rows="2" 
-                                      placeholder="Reply to ${comment.author || 'Anonymous'}..." required></textarea>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-sm btn-primary">Reply</button>
-                            <button type="button" class="btn btn-sm btn-secondary cancel-reply-btn" data-comment-id="${comment.comment_id}">Cancel</button>
-                        </div>
-                    </form>
-                </div>
+                <div class="comment-content">${this.escapeHtml(commentData.content)}</div>
+                ${this.config.isAuthenticated ? `
+                    <div class="comment-actions">
+                        <button class="btn-action reply-btn" data-comment-id="${commentData.id}">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                        <button class="btn-action like-btn" data-comment-id="${commentData.id}">
+                            <i class="fas fa-thumbs-up"></i> 
+                            <span class="like-count">0</span>
+                        </button>
+                    </div>
+                    <div class="reply-form" id="reply-form-${commentData.id}" style="display: none;">
+                        <form class="reply-form-submit" data-comment-id="${commentData.id}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${this.config.csrfToken}">
+                            <input type="hidden" name="parent_comment" value="${commentData.id}">
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" name="content" placeholder="Write a reply..." style="height: 80px" required></textarea>
+                                <label>Reply to ${this.escapeHtml(commentData.author || 'Anonymous')}...</label>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-reply"></i> Reply
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary cancel-reply" data-comment-id="${commentData.id}">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                ` : ''}
             </div>
         `;
         
-        if (isReply && parentCommentId) {
-            // Add as reply to specific comment
-            const parentComment = document.querySelector(`#reply-form-${parentCommentId}`).closest('.comment-card');
-            parentComment.insertAdjacentHTML('afterend', commentHtml);
-        } else {
-            // Add as new comment
-            const emptyMessage = commentsContainer.querySelector('.text-muted');
-            if (emptyMessage && emptyMessage.textContent.includes('No comments yet')) {
-                emptyMessage.remove();
-            }
-            commentsContainer.insertAdjacentHTML('beforeend', commentHtml);
-        }
-    }
-};
-
-// Make functions available globally for backward compatibility
-window.handleReaction = ComplaintApp.handleReaction;
-window.toggleReaction = ComplaintApp.handleReaction;
-window.replyToComment = ComplaintApp.replyToComment;
-window.hideReplyForm = ComplaintApp.hideReplyForm;
-window.shareComplaint = ComplaintApp.shareComplaint;
-window.reportComplaint = ComplaintApp.reportComplaint;
-window.showToast = ComplaintApp.showToast;
-
-// Test that functions are defined
-console.log('Functions available:');
-console.log('- handleReaction:', typeof window.handleReaction);
-console.log('- toggleReaction:', typeof window.toggleReaction);
-console.log('- replyToComment:', typeof window.replyToComment);
-console.log('- shareComplaint:', typeof window.shareComplaint);
-console.log('- reportComplaint:', typeof window.reportComplaint);
-
-// DOM ready event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - Setting up event listeners');
-    
-    // Event delegation for reaction buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('[data-type]')) {
-            e.preventDefault();
-            const button = e.target.closest('[data-type]');
-            const reactionType = button.getAttribute('data-type');
-            console.log('Reaction clicked:', reactionType);
-            ComplaintApp.handleReaction(reactionType);
-        }
+        container.insertAdjacentHTML('afterbegin', commentHtml);
         
-        // Reply button clicks
-        if (e.target.closest('.reply-btn')) {
-            e.preventDefault();
-            const button = e.target.closest('.reply-btn');
-            const commentId = button.getAttribute('data-comment-id');
-            console.log('Reply clicked for comment:', commentId);
-            ComplaintApp.replyToComment(commentId);
-        }
-        
-        // Cancel reply button clicks
-        if (e.target.closest('.cancel-reply-btn')) {
-            e.preventDefault();
-            const button = e.target.closest('.cancel-reply-btn');
-            const commentId = button.getAttribute('data-comment-id');
-            console.log('Cancel reply clicked for comment:', commentId);
-            ComplaintApp.hideReplyForm(commentId);
-        }
-        
-        // Share button clicks
-        if (e.target.closest('.share-btn')) {
-            e.preventDefault();
-            console.log('Share clicked');
-            ComplaintApp.shareComplaint();
-        }
-        
-        // Report button clicks
-        if (e.target.closest('.report-btn')) {
-            e.preventDefault();
-            console.log('Report clicked');
-            ComplaintApp.reportComplaint();
-        }
-    });
-    
-    // Handle comment form submissions
-    document.addEventListener('submit', function(e) {
-        // Main comment form
-        if (e.target.matches('#comment-form')) {
-            e.preventDefault();
-            console.log('Main comment form submitted');
-            ComplaintApp.handleCommentSubmit(e.target);
-        }
-        
-        // Reply forms
-        if (e.target.matches('.reply-form-ajax')) {
-            e.preventDefault();
-            console.log('Reply form submitted');
-            ComplaintApp.handleReplySubmit(e.target);
-        }
-    });
-    
-    console.log('Event listeners set up successfully');
-});
+        // Rebind events for new elements
+        this.bindEvents();
+    },
 
-// Add comment and reply submission handlers to ComplaintApp
-ComplaintApp.handleCommentSubmit = function(form) {
-    const formData = new FormData(form);
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const textarea = form.querySelector('textarea[name="content"]');
-    
-    // Show loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Posting...';
-    
-    fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            ComplaintApp.showToast('Comment added successfully!', true);
-            textarea.value = ''; // Clear form
-            // Add new comment to DOM
-            ComplaintApp.addCommentToDOM(data.comment);
-        } else {
-            ComplaintApp.showToast(data.error || 'Failed to add comment', false);
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting comment:', error);
-        ComplaintApp.showToast('Network error. Please try again.', false);
-    })
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post Comment';
-    });
-};
+    // Add reply to DOM
+    addReplyToDOM(replyData, parentCommentId) {
+        const parentComment = document.querySelector(`[data-comment-id="${parentCommentId}"]`);
+        if (!parentComment) return;
+        
+        const replyHtml = `
+            <div class="comment-item reply">
+                <div class="comment-header">
+                    <div>
+                        <span class="comment-author">${this.escapeHtml(replyData.author || 'Anonymous')}</span>
+                        <span class="comment-time">
+                            <i class="fas fa-clock"></i>
+                            just now
+                        </span>
+                    </div>
+                </div>
+                <div class="comment-content">${this.escapeHtml(replyData.content)}</div>
+            </div>
+        `;
+        
+        parentComment.insertAdjacentHTML('beforeend', replyHtml);
+        
+        // Update reply count for this comment
+        this.updateReplyCount(parentCommentId, 1);
+    },
 
-ComplaintApp.handleReplySubmit = function(form) {
-    const formData = new FormData(form);
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const textarea = form.querySelector('textarea[name="content"]');
-    const commentId = form.getAttribute('data-comment-id');
-    
-    // Show loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Replying...';
-    
-    fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            ComplaintApp.showToast('Reply added successfully!', true);
-            textarea.value = ''; // Clear form
-            ComplaintApp.hideReplyForm(commentId); // Hide form
-            // Add new reply to DOM
-            ComplaintApp.addCommentToDOM(data.comment, true, commentId);
-        } else {
-            ComplaintApp.showToast(data.error || 'Failed to add reply', false);
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting reply:', error);
-        ComplaintApp.showToast('Network error. Please try again.', false);
-    })
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Reply';
-    });
-};
-
-// Handle main comment form submission
-document.addEventListener('DOMContentLoaded', function() {
-    const commentForm = document.getElementById('commentForm');
-    if (commentForm) {
-        commentForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            const content = document.getElementById('commentContent').value.trim();
-            
-            if (!content) {
-                showToast('Please enter a comment before submitting.', false);
-                return;
-            }
-            
-            formData.append('content', content);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-            
-            fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Comment added successfully!');
-                    document.getElementById('commentContent').value = '';
-                    // Add comment to DOM without page reload
-                    addCommentToDOM(data);
-                    // Update comment count
-                    const commentCount = document.querySelector('.card-title i.fas.fa-comments').parentElement;
-                    const currentCount = parseInt(commentCount.textContent.match(/\d+/)[0]);
-                    commentCount.innerHTML = `<i class="fas fa-comments text-primary"></i> Comments (${currentCount + 1})`;
-                } else {
-                    showToast('Error adding comment: ' + (data.error || 'Unknown error'), false);
+    // Update reply count
+    updateReplyCount(commentId, increment) {
+        // Update reply count in button
+        const replyBtn = document.querySelector(`[data-comment-id="${commentId}"].reply-btn`);
+        if (replyBtn) {
+            let replyCountSpan = replyBtn.querySelector('.reply-count');
+            if (replyCountSpan) {
+                const currentCount = parseInt(replyCountSpan.textContent) || 0;
+                const newCount = currentCount + increment;
+                replyCountSpan.textContent = newCount;
+                if (newCount <= 0) {
+                    replyCountSpan.remove();
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error adding comment. Please try again.', false);
-            });
-        });
-    }
-    
-    // Handle reply form submissions
-    document.addEventListener('submit', function(e) {
-        if (e.target.classList.contains('reply-form-ajax')) {
-            e.preventDefault();
-            
-            const form = e.target;
-            const formData = new FormData(form);
-            const parentCommentId = form.dataset.commentId;
-            
-            fetch('{% url "complaints:add_comment" complaint.complaint_number %}', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Reply added successfully!');
-                    form.reset();
-                    hideReplyForm(parentCommentId);
-                    // Add reply to DOM
-                    addCommentToDOM(data, true, parentCommentId);
-                } else {
-                    showToast('Error adding reply: ' + (data.error || 'Unknown error'), false);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error adding reply. Please try again.', false);
-            });
-        }
-    });
-});
-
-function shareComplaint() {
-    if (navigator.share) {
-        navigator.share({
-            title: '{{ complaint.title }}',
-            text: '{{ complaint.description|truncatechars:100 }}',
-            url: window.location.href
-        });
-    } else {
-        // Fallback to copy URL
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-    }
-}
-
-function reportComplaint() {
-    if (confirm('Are you sure you want to report this complaint as inappropriate?')) {
-        fetch('{% url "complaints:report" complaint.complaint_number %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            } else if (increment > 0) {
+                // Create new reply count span
+                replyCountSpan = document.createElement('span');
+                replyCountSpan.className = 'reply-count';
+                replyCountSpan.textContent = '1';
+                replyBtn.appendChild(replyCountSpan);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
+        }
+
+        // Update reply count display
+        const replyCountDisplay = document.getElementById(`reply-count-${commentId}`);
+        if (replyCountDisplay) {
+            const currentCount = parseInt(replyCountDisplay.textContent) || 0;
+            const newCount = currentCount + increment;
+            replyCountDisplay.textContent = newCount;
+            
+            // Update pluralization
+            const parentDiv = replyCountDisplay.closest('.reply-count-display');
+            if (parentDiv) {
+                const text = newCount === 1 ? 'reply' : 'replies';
+                parentDiv.innerHTML = `
+                    <small class="text-muted">
+                        <i class="fas fa-comments"></i>
+                        <span id="reply-count-${commentId}">${newCount}</span> ${text}
+                    </small>
+                `;
+            }
+        } else if (increment > 0) {
+            // Create new reply count display
+            const parentComment = document.querySelector(`[data-comment-id="${commentId}"]`);
+            if (parentComment) {
+                const replyForm = parentComment.querySelector('.reply-form');
+                if (replyForm) {
+                    const replyCountHtml = `
+                        <div class="reply-count-display">
+                            <small class="text-muted">
+                                <i class="fas fa-comments"></i>
+                                <span id="reply-count-${commentId}">1</span> reply
+                            </small>
+                        </div>
+                    `;
+                    replyForm.insertAdjacentHTML('beforebegin', replyCountHtml);
+                }
+            }
+        }
+    },
+
+    // Update comment count
+    updateCommentCount(increment) {
+        const countElement = document.getElementById('comment-count');
+        if (countElement) {
+            const currentCount = parseInt(countElement.textContent) || 0;
+            countElement.textContent = currentCount + increment;
+        }
+
+        const sidebarElement = document.getElementById('sidebar-comments');
+        if (sidebarElement) {
+            const currentCount = parseInt(sidebarElement.textContent) || 0;
+            sidebarElement.textContent = currentCount + increment;
+        }
+    },
+
+    // Hide no comments message
+    hideNoCommentsMessage() {
+        const noCommentsElement = document.getElementById('no-comments');
+        if (noCommentsElement) {
+            noCommentsElement.style.display = 'none';
+        }
+    },
+
+    // Share complaint
+    async shareComplaint() {
+        const url = window.location.href;
+        const title = '{{ complaint.title|escapejs }}';
+        const text = '{{ complaint.description|truncatechars:100|escapejs }}';
+
+        // Try native sharing first
+        if (navigator.share) {
+            try {
+                await navigator.share({ title, text, url });
+                this.trackShare('native');
+                this.showToast('Complaint shared successfully!');
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    this.fallbackShare(url);
+                }
+            }
+        } else {
+            this.fallbackShare(url);
+        }
+    },
+
+    // Fallback share method
+    async fallbackShare(url) {
+        try {
+            await navigator.clipboard.writeText(url);
+            this.showToast('Link copied to clipboard!');
+            this.trackShare('clipboard');
+        } catch (error) {
+            // Ultimate fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    this.showToast('Link copied to clipboard!');
+                    this.trackShare('clipboard');
+                } else {
+                    this.showToast(`Please copy this link manually: ${url}`, 'error');
+                }
+            } catch (err) {
+                this.showToast(`Please copy this link manually: ${url}`, 'error');
+            }
+
+            document.body.removeChild(textArea);
+        }
+    },
+
+    // Track share
+    async trackShare(platform) {
+        try {
+            await fetch(`/complaints/${this.config.complaintNumber}/share/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: `platform=${encodeURIComponent(platform)}`
+            });
+        } catch (error) {
+            console.error('Share tracking error:', error);
+        }
+    },
+
+    // Report complaint
+    async reportComplaint() {
+        const reason = prompt('Please provide a reason for reporting this complaint:');
+        if (!reason) return;
+
+        try {
+            const response = await fetch(`/complaints/${this.config.complaintNumber}/report/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: `reason=inappropriate&description=${encodeURIComponent(reason)}`
+            });
+
+            const data = await response.json();
+            
             if (data.success) {
-                alert('Thank you for your report. We will review this complaint.');
-            }
-        });
-    }
-}
-
-// Auto-refresh status updates every 30 seconds (commented out - URL not implemented)
-/*
-setInterval(function() {
-    fetch('{% url "complaints:status_updates" complaint.complaint_number %}')
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_updates) {
-                location.reload();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}, 30000);
-*/
-
-// Add event delegation as backup for reaction buttons
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, setting up event delegation');
-    
-    // Event delegation for reaction buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.reaction-btn')) {
-            e.preventDefault();
-            const btn = e.target.closest('.reaction-btn');
-            const reactionType = btn.getAttribute('data-type');
-            console.log('Reaction button clicked via event delegation:', reactionType);
-            
-            if (reactionType && typeof window.handleReaction === 'function') {
-                window.handleReaction(reactionType);
+                this.showToast('Thank you for your report. We will review this complaint.');
+                const reportBtn = document.getElementById('reportBtn');
+                if (reportBtn) {
+                    reportBtn.disabled = true;
+                    reportBtn.innerHTML = '<i class="fas fa-check"></i> Reported';
+                }
             } else {
-                console.error('handleReaction function not available or no reaction type');
+                this.showToast(data.error || 'Failed to submit report', 'error');
             }
+        } catch (error) {
+            console.error('Report error:', error);
+            this.showToast('Network error. Please try again.', 'error');
         }
-    });
-    
-    // Test function availability on DOM ready
-    console.log('Functions available on DOM ready:');
-    console.log('- handleReaction:', typeof window.handleReaction);
-    console.log('- toggleReaction:', typeof window.toggleReaction);
-});
+    },
 
+    // Toggle follow status
+    async toggleFollow() {
+        const followBtn = document.getElementById('followBtn');
+        const isFollowing = followBtn.dataset.following === 'true';
+        
+        followBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`/complaints/${this.config.complaintNumber}/follow/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                followBtn.dataset.following = data.is_following;
+                followBtn.querySelector('.follow-text').textContent = data.is_following ? 'Following' : 'Follow';
+                this.showToast(data.is_following ? 'Following complaint for updates' : 'Unfollowed complaint');
+            } else {
+                this.showToast(data.error || 'Failed to update follow status', 'error');
+            }
+        } catch (error) {
+            console.error('Follow error:', error);
+            this.showToast('Network error. Please try again.', 'error');
+        } finally {
+            followBtn.disabled = false;
+        }
+    },
+
+    // Toggle comment like
+    async toggleCommentLike(e) {
+        e.preventDefault();
+        // TODO: Implement comment like functionality
+        this.showToast('Comment like feature coming soon!');
+    },
+
+    // Utility function to escape HTML
+    escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/\n/g, '<br>');
+    }
+};
+
+// Initialize the application when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    ComplaintApp.init();
+});
 </script>
 {% endblock %}

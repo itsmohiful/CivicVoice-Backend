@@ -149,7 +149,10 @@ class ComplaintCommentAdmin(admin.ModelAdmin):
     complaint_number.short_description = _('Complaint')
     
     def created_by_name(self, obj):
-        return 'Anonymous' if obj.is_anonymous else obj.created_by.name
+        if obj.is_anonymous:
+            return "Anonymous"
+        return obj.created_by.name if obj.created_by else "Unknown"
+    
     created_by_name.short_description = _('Author')
     
     def content_short(self, obj):
