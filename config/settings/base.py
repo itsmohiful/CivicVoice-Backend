@@ -80,6 +80,7 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
+    'drf_spectacular'
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -139,7 +140,30 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Civic Information API',
+    'DESCRIPTION': 'API for accessing civic information',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': True,  # Show schema in /api/schema/
+    'COMPONENT_SPLIT_REQUEST': True,  # Show request/response bodies
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+        'displayOperationId': True,
+    },
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SERVE_AUTHENTICATION': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'PREPROCESSING_HOOKS': [],
+    'POSTPROCESSING_HOOKS': [],
+    'SCHEMA_PATH_PREFIX_TRIM': True,
+}
+
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url

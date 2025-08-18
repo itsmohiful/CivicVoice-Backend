@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from graphene_django.views import GraphQLView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from graphene_file_upload.django import FileUploadGraphQLView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -42,6 +43,13 @@ if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
 urlpatterns += [
     path('graphql/', csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
+]
+
+urlpatterns += [
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 
