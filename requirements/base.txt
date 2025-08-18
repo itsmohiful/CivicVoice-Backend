@@ -31,3 +31,4 @@ django-filter==24.3  # https://github.com/carltongibson/django-filter
 djangorestframework
 djangorestframework-simplejwt
 drf-spectacular
+dj-rest-auth

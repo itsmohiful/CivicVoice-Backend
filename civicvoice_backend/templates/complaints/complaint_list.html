@@ -4,210 +4,368 @@
 {% block title %}Complaints - CivicVoice{% endblock %}
 
 {% block extra_css %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-    .complaint-card {
-        transition: all 0.3s ease;
-        border: 1px solid #e3e6f0;
-        border-radius: 0.35rem;
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 0;
+        margin-bottom: 1.25rem;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
         margin-bottom: 1rem;
     }
-    .complaint-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
     }
-    .status-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
+    
+    .stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
     }
-    .priority-high { color: #e74a3b; }
-    .priority-medium { color: #f6c23e; }
-    .priority-low { color: #1cc88a; }
-    .priority-urgent { color: #e74a3b; font-weight: bold; }
-    .priority-critical { color: #dc3545; font-weight: bold; }
-    .search-filters {
-        background: #f8f9fc;
-        padding: 1.5rem;
-        border-radius: 0.35rem;
-        margin-bottom: 2rem;
+    
+    .icon-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .icon-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+    .icon-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .icon-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+    
+    .search-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 1.25rem;
     }
-    .stats-card {
-        background: linear-gradient(45deg, #4e73df, #224abe);
+    
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.2);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.25);
+    }
+    
+    .category-filter {
+        margin-bottom: 1.25rem;
+    }
+    
+    .category-btn {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 20px;
+        padding: 0.375rem 1rem;
+        margin: 0.2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #495057;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .category-btn:hover, .category-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-radius: 0.35rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
+        border-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25);
+    }
+    
+    .complaint-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    
+    .complaint-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+    
+    .complaint-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 0.875rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .status-badge {
+        padding: 0.3rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .status-resolved { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-progress { background: #cce5ff; color: #004085; }
+    .status-review { background: #f8d7da; color: #721c24; }
+    
+    .priority-urgent, .priority-critical { color: #dc3545; font-weight: bold; }
+    .priority-high { color: #fd7e14; font-weight: 600; }
+    .priority-medium { color: #ffc107; font-weight: 500; }
+    .priority-low { color: #198754; font-weight: 500; }
+    
+    .complaint-footer {
+        background: #f8f9fa;
+        padding: 0.75rem 0.875rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .metric-item {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    .metric-item i {
+        font-size: 1rem;
+        margin-bottom: 0.1rem;
+        display: block;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 0.5rem 0.5rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .empty-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.5rem;
+        color: #6c757d;
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .page-link {
+        border-radius: 6px;
+        margin: 0 0.15rem;
+        border: 1px solid #e9ecef;
+        color: #495057;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+    
+    .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+    }
+    
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    
-    <!-- Page Header -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-comments mr-2"></i>Public Complaints
-        </h1>
-        <div>
-            {% if user.is_authenticated %}
-                <a href="{% url 'complaints:create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Submit Complaint
-                </a>
-                <a href="{% url 'complaints:my_complaints' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-user"></i> My Complaints
-                </a>
-            {% else %}
-                <a href="{% url 'account_login' %}" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Login to Submit
-                </a>
-            {% endif %}
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h2 fw-bold mb-1">
+                    <i class="fas fa-comments me-2"></i>Public Complaints
+                </h1>
+                <p class="mb-0 text-light">Browse and track community concerns</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-2 mt-lg-0">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'complaints:create' %}" class="btn btn-light me-2">
+                        <i class="fas fa-plus me-1"></i>Submit Complaint
+                    </a>
+                    <a href="{% url 'complaints:my_complaints' %}" class="btn btn-outline-light">
+                        <i class="fas fa-user me-1"></i>My Complaints
+                    </a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="btn btn-light">
+                        <i class="fas fa-sign-in-alt me-1"></i>Login to Submit
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
+</div>
 
+<div class="container">
     <!-- Statistics Cards -->
     <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Complaints</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_complaints }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card text-center">
+                <div class="stats-icon icon-primary mx-auto">
+                    <i class="fas fa-comments"></i>
                 </div>
+                <h5 class="fw-bold mb-1">{{ stats.total_complaints }}</h5>
+                <small class="text-muted">Total Complaints</small>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Resolved</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.resolved_complaints }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card text-center">
+                <div class="stats-icon icon-success mx-auto">
+                    <i class="fas fa-check-circle"></i>
                 </div>
+                <h5 class="fw-bold mb-1">{{ stats.resolved_complaints }}</h5>
+                <small class="text-muted">Resolved</small>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_complaints }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card text-center">
+                <div class="stats-icon icon-warning mx-auto">
+                    <i class="fas fa-clock"></i>
                 </div>
+                <h5 class="fw-bold mb-1">{{ stats.pending_complaints }}</h5>
+                <small class="text-muted">Pending</small>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Categories</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ categories.count }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-tags fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card text-center">
+                <div class="stats-icon icon-info mx-auto">
+                    <i class="fas fa-tags"></i>
                 </div>
+                <h5 class="fw-bold mb-1">{{ categories.count }}</h5>
+                <small class="text-muted">Categories</small>
             </div>
         </div>
     </div>
 
     <!-- Search and Filters -->
-    <div class="search-filters">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
-                {{ search_form.search }}
-            </div>
-            <div class="col-md-2">
-                {{ search_form.category }}
-            </div>
-            <div class="col-md-2">
-                {{ search_form.status }}
-            </div>
-            <div class="col-md-2">
-                {{ search_form.priority }}
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search"></i> Search
-                </button>
+    <div class="search-section">
+        <h6 class="fw-bold mb-2">
+            <i class="fas fa-search me-1"></i>Search & Filter Complaints
+        </h6>
+        <form method="get">
+            <div class="row g-2">
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold small">Search</label>
+                    {{ search_form.search }}
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold small">Category</label>
+                    {{ search_form.category }}
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold small">Status</label>
+                    {{ search_form.status }}
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold small">Priority</label>
+                    {{ search_form.priority }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Search Complaints
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
     <!-- Category Filter Buttons -->
-    <div class="mb-4">
-        <div class="btn-group" role="group" aria-label="Category filters">
-            <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary {% if not request.GET.category %}active{% endif %}">
-                All Categories
+    <div class="category-filter text-center">
+        <a href="{% url 'complaints:list' %}" 
+           class="category-btn {% if not request.GET.category %}active{% endif %}">
+            <i class="fas fa-th-large me-1"></i>All Categories
+        </a>
+        {% for category in categories %}
+            <a href="?category={{ category.id }}" 
+               class="category-btn {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">
+                <i class="{{ category.icon }} me-1"></i>{{ category.name }}
             </a>
-            {% for category in categories %}
-                <a href="?category={{ category.id }}" 
-                   class="btn btn-outline-secondary {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}"
-                   style="color: {{ category.color }};">
-                    <i class="{{ category.icon }}"></i> {{ category.name }}
-                </a>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
 
     <!-- Complaints List -->
     <div class="row">
         {% for complaint in complaints %}
-            <div class="col-lg-6 col-xl-4">
-                <div class="complaint-card card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold" style="color: {{ complaint.category.color }};">
-                            <i class="{{ complaint.category.icon }}"></i> {{ complaint.category.name }}
-                        </h6>
-                        <span class="badge status-badge 
-                            {% if complaint.status == 'resolved' %}badge-success
-                            {% elif complaint.status == 'in_progress' %}badge-warning
-                            {% elif complaint.status == 'under_review' %}badge-info
-                            {% else %}badge-secondary{% endif %}">
+            <div class="col-lg-4 col-md-6">
+                <div class="complaint-card h-100">
+                    <div class="complaint-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="{{ complaint.category.icon }} text-primary me-2"></i>
+                            <h6 class="fw-bold mb-0">{{ complaint.category.name }}</h6>
+                        </div>
+                        <span class="status-badge 
+                            {% if complaint.status == 'resolved' %}status-resolved
+                            {% elif complaint.status == 'in_progress' %}status-progress
+                            {% elif complaint.status == 'under_review' %}status-review
+                            {% else %}status-pending{% endif %}">
                             {{ complaint.get_status_display }}
                         </span>
                     </div>
                     
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="{% url 'complaints:detail' complaint.complaint_number %}" class="text-decoration-none">
-                                {{ complaint.title|truncatechars:50 }}
+                    <div class="card-body p-3">
+                        <h6 class="card-title fw-bold mb-2">
+                            <a href="{% url 'complaints:detail' complaint.complaint_number %}" 
+                               class="text-decoration-none text-dark">
+                                {{ complaint.title|truncatechars:45 }}
                             </a>
-                        </h5>
+                        </h6>
                         
-                        <p class="card-text text-muted">
-                            {{ complaint.description|truncatechars:100 }}
+                        <p class="card-text text-muted mb-2 small">
+                            {{ complaint.description|truncatechars:80 }}
                         </p>
                         
                         <div class="mb-2">
                             <small class="text-muted">
-                                <i class="fas fa-map-marker-alt"></i> 
+                                <i class="fas fa-map-marker-alt me-1"></i>
                                 {% if complaint.location %}
                                     {{ complaint.location.city }}, {{ complaint.location.state }}
                                 {% else %}
@@ -216,39 +374,33 @@
                             </small>
                         </div>
                         
-                        <div class="mb-2">
-                            <span class="badge badge-pill priority-{{ complaint.priority }}">
-                                {{ complaint.get_priority_display }}
+                        <div class="mb-0">
+                            <span class="badge bg-light text-dark me-1 priority-{{ complaint.priority }}" style="font-size: 0.7rem;">
+                                <i class="fas fa-flag me-1"></i>{{ complaint.get_priority_display }}
                             </span>
                             {% for tag in complaint.tags.all %}
-                                <span class="badge badge-secondary" style="background-color: {{ tag.color }};">
-                                    {{ tag.name }}
-                                </span>
+                                <span class="badge bg-secondary me-1" style="font-size: 0.65rem;">{{ tag.name }}</span>
                             {% endfor %}
                         </div>
                     </div>
                     
-                    <div class="card-footer">
+                    <div class="complaint-footer">
                         <div class="row text-center">
-                            <div class="col-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-eye"></i> {{ complaint.view_count }}
-                                </small>
+                            <div class="col-3 metric-item">
+                                <i class="fas fa-eye"></i>
+                                <small class="d-block">{{ complaint.view_count }}</small>
                             </div>
-                            <div class="col-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-thumbs-up"></i> {{ complaint.reaction_count }}
-                                </small>
+                            <div class="col-3 metric-item">
+                                <i class="fas fa-thumbs-up"></i>
+                                <small class="d-block">{{ complaint.reaction_count }}</small>
                             </div>
-                            <div class="col-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-comments"></i> {{ complaint.comment_count }}
-                                </small>
+                            <div class="col-3 metric-item">
+                                <i class="fas fa-comments"></i>
+                                <small class="d-block">{{ complaint.comment_count }}</small>
                             </div>
-                            <div class="col-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"M d" }}
-                                </small>
+                            <div class="col-3 metric-item">
+                                <i class="fas fa-calendar"></i>
+                                <small class="d-block">{{ complaint.created_at|date:"M d" }}</small>
                             </div>
                         </div>
                     </div>
@@ -256,16 +408,28 @@
             </div>
         {% empty %}
             <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-comments fa-3x text-gray-300 mb-3"></i>
-                    <h4 class="text-gray-500">No complaints found</h4>
-                    <p class="text-gray-400">Try adjusting your search criteria or 
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">No complaints found</h5>
+                    <p class="text-muted mb-3 small">
+                        Try adjusting your search criteria or 
                         {% if user.is_authenticated %}
-                            <a href="{% url 'complaints:create' %}">submit the first complaint</a>.
+                            submit the first complaint to get started.
                         {% else %}
-                            <a href="{% url 'account_login' %}">login to submit a complaint</a>.
+                            login to submit a complaint.
                         {% endif %}
                     </p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'complaints:create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Submit First Complaint
+                        </a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login to Submit
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
@@ -274,13 +438,17 @@
     <!-- Pagination -->
     {% if is_paginated %}
         <nav aria-label="Complaints pagination">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">First</a>
+                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="fas fa-angle-double-left me-1"></i>First
+                        </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="fas fa-angle-left me-1"></i>Previous
+                        </a>
                     </li>
                 {% endif %}
 
@@ -292,10 +460,14 @@
 
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            Next<i class="fas fa-angle-right ms-1"></i>
+                        </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Last</a>
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            Last<i class="fas fa-angle-double-right ms-1"></i>
+                        </a>
                     </li>
                 {% endif %}
             </ul>
@@ -306,5 +478,33 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate cards on load
+        const cards = document.querySelectorAll('.complaint-card, .stats-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Search form loading state
+        const searchForm = document.querySelector('form[method="get"]');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Searching...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

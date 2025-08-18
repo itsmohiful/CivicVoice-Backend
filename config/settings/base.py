@@ -98,6 +98,8 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "rest_framework",
     "rest_framework_simplejwt",
+    # 'dj_rest_auth',
+    # 'dj_rest_auth.registration',
 ]
 
 LOCAL_APPS = [
@@ -144,26 +146,18 @@ REST_FRAMEWORK = {
 }
 
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Civic Information API',
-    'DESCRIPTION': 'API for accessing civic information',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': True,  # Show schema in /api/schema/
-    'COMPONENT_SPLIT_REQUEST': True,  # Show request/response bodies
-    'SWAGGER_UI_SETTINGS': {
-        'persistAuthorization': True,
-        'displayOperationId': True,
-    },
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
-    'SERVE_AUTHENTICATION': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'PREPROCESSING_HOOKS': [],
-    'POSTPROCESSING_HOOKS': [],
-    'SCHEMA_PATH_PREFIX_TRIM': True,
-}
 
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": " CivicVoice Information API",
+    "DESCRIPTION": "Documentation of API endpoints of CivicVoice Information",
+    "VERSION": "1.0.0",
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    "SERVERS": [
+        {"url": f"http://127.0.0.1:8000", "description": "Local Development server"},
+        {"url": f"http://127.0.0.1:8000", "description": "Production server"},
+    ],
+}
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url

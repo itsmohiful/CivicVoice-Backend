@@ -1,8 +1,7 @@
 
 from typing import ClassVar
 from django.contrib.auth.models import AbstractUser
-from django.db.models import CharField
-from django.db.models import EmailField
+from django.db import models 
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -17,16 +16,17 @@ class User(AbstractUser):
     """
     
     # Overriding fields in AbstractUser
-    first_name = None  # type: ignore
-    last_name = None  # type: ignore
-    username = None  # type: ignore
+    username = models.CharField(max_length=255, blank=True, null=True)
+    first_name = models.CharField(max_length=150, blank=True, null=True)
+    last_name = models.CharField(max_length=150, blank=True, null=True)
+    phone = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to='users/images/', blank=True, null=True)
 
-    # Custom fields
-    name = CharField(_("Name of User"), blank=True, max_length=255)
-    reset_password_token = CharField(max_length=255, blank=True, null=True)
-    reset_otp= CharField(max_length=6, blank=True, null=True)
-    verify_token = CharField(max_length=255, blank=True, null=True)
-    email = EmailField(_("email address"), unique=True)
+    name = models.CharField(_("Name of User"), blank=True, max_length=255)
+    reset_password_token = models.CharField(max_length=255, blank=True, null=True)
+    reset_otp= models.CharField(max_length=6, blank=True, null=True)
+    verify_token = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(_("email address"), unique=True)
 
     # Update the USERNAME_FIELD and REQUIRED_FIELDS
     USERNAME_FIELD = "email"
