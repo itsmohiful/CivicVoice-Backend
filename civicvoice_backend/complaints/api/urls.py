@@ -6,6 +6,7 @@ from civicvoice_backend.complaints.api.viewsets import (
     ComplaintReactionViewSet, ComplaintAttachmentViewSet, ComplaintShareViewSet,
     ComplaintFollowerViewSet, ComplaintReportViewSet, ComplaintStatusHistoryViewSet
 )
+from civicvoice_backend.users.api.views import RegisterView, MeView
 from civicvoice_backend.complaints.api.views import api_root
 
 # Create a router and register our viewsets with it
@@ -27,4 +28,6 @@ router.register(r'status-history', ComplaintStatusHistoryViewSet, basename='comp
 urlpatterns = [
     path('', api_root, name='api-root'),
     path('', include(router.urls)),
+    path('register/', RegisterView.as_view(), name='user-register'),
+    path('me/', MeView.as_view(), name='user-me'),
 ]

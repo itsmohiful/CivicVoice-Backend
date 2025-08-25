@@ -21,6 +21,8 @@ def api_root(request, format=None):
                 'token_obtain': reverse('token_obtain_pair', request=request, format=format),
                 'token_refresh': reverse('token_refresh', request=request, format=format),
                 'token_verify': reverse('token_verify', request=request, format=format),
+                'register': reverse('user-register', request=request, format=format),
+                'me': reverse('user-me', request=request, format=format)
             },
             'Complaints': {
                 'categories': reverse('complaintcategory-list', request=request, format=format),

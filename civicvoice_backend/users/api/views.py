@@ -1,6 +1,6 @@
 # views.py
 from rest_framework import generics, permissions
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, MeSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -11,3 +11,12 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
   
+
+
+
+class MeView(generics.RetrieveAPIView):
+    serializer_class = MeSerializer
+
+    def get_object(self):
+        return self.request.user    
+    

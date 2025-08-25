@@ -9,7 +9,7 @@ from django.contrib import admin
 from graphene_django.views import GraphQLView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from graphene_file_upload.django import FileUploadGraphQLView
-from civicvoice_backend.users.api.views import RegisterView
+from civicvoice_backend.users.api.views import RegisterView, MeView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -39,7 +39,8 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # path('api/registration/', RegistrationView.as_view(), name='registration'),
-    path("api/register/", RegisterView.as_view(), name="register")
+    # path("api/register/", RegisterView.as_view(), name="register"),
+    # path("api/me/", MeView.as_view(), name="me"),
     # path('api/auth/', include('dj_rest_auth.urls')),           # login/logout
     # path('api/auth/registration/', include('dj_rest_auth.registration.urls'))
 
