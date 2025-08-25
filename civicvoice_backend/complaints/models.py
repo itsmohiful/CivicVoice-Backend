@@ -293,9 +293,10 @@ class ComplaintAttachment(BaseModel):
     """File attachments for complaints"""
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(_("File"), upload_to='complaints/attachments/%Y/%m/')
-    original_name = models.CharField(_("Original Name"), max_length=255)
-    file_size = models.PositiveIntegerField(_("File Size"), help_text=_("Size in bytes"))
-    file_type = models.CharField(_("File Type"), max_length=100)
+    original_name = models.CharField(_("Original Name"), max_length=255, blank=True,null=True,
+                                     help_text=_("Name of the file as uploaded by user"))
+    file_size = models.PositiveIntegerField(_("File Size"), help_text=_("Size in bytes"), blank=True, null=True)
+    file_type = models.CharField(_("File Type"), max_length=100, blank=True, null=True)
     description = models.CharField(_("Description"), max_length=255, blank=True)
     
     class Meta:
@@ -310,6 +311,16 @@ class ComplaintAttachment(BaseModel):
         # Validate file size (max 10MB)
         if self.file and self.file.size > 10 * 1024 * 1024:
             raise ValidationError(_("File size cannot exceed 10MB"))
+        
+
+    #  get file name, type and size after upload file and save it
+    def save(self, *args, **kwargs):
+        if self.file:
+            import mimetypes
+            self.original_name = self.file.name.rsplit('.', 1)[0]  # name only without extension
+            self.file_size = self.file.size
+            self.file_type = mimetypes.guess_type(self.file.name)[0] or 'application/octet-stream'
+        super().save(*args, **kwargs)
 
 
 class ComplaintReaction(BaseModel):

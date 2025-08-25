@@ -332,10 +332,10 @@
                     <h1 class="h3 mb-2">{{ complaint.title }}</h1>
                     <div class="d-flex flex-wrap gap-2 align-items-center">
                         <span class="badge bg-light text-dark">
-                            <i class="fas fa-hashtag"></i> {{ complaint.complaint_number }}
+                            <i class="fas fa-hashtag"></i> {{ complaint.complaint_number }} >
                         </span>
                         <span class="badge bg-light text-dark">
-                            <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"M d, Y" }}
+                            <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"M d, Y" }} >
                         </span>
                         {% if complaint.created_by %}
                             <span class="badge bg-light text-dark">
@@ -483,7 +483,7 @@
                 </div>
 
                 <!-- Location Card -->
-                <div class="card">
+                <div class="card mb-4 mt-4">
                     <div class="card-header">
                         <i class="fas fa-map-marker-alt text-primary"></i>
                         Location Information
@@ -524,7 +524,7 @@
 
                 <!-- Attachments Card -->
                 {% if complaint.attachments.exists %}
-                    <div class="card">
+                    <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-paperclip text-primary"></i>
                             Attachments ({{ complaint.attachments.count }})
@@ -555,7 +555,7 @@
 
                 <!-- Reactions Card -->
                 {% if user.is_authenticated %}
-                    <div class="card">
+                    <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-heart text-primary"></i>
                             Community Response
@@ -605,7 +605,7 @@
                 {% endif %}
 
                 <!-- Comments Card -->
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>
                             <i class="fas fa-comments text-primary"></i>
@@ -626,7 +626,7 @@
                                               required></textarea>
                                     <label for="commentContent">Share your thoughts or provide additional information...</label>
                                 </div>
-                                <button type="submit" class="btn btn-primary" id="commentSubmitBtn">
+                                <button type="submit" class="btn btn-primary mt-4" id="commentSubmitBtn">
                                     <i class="fas fa-comment"></i> Add Comment
                                 </button>
                             </form>
@@ -748,7 +748,7 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Stats Card -->
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header">
                         <i class="fas fa-chart-bar text-primary"></i>
                         Engagement Stats
@@ -803,7 +803,7 @@
 
                 <!-- Related Complaints Card -->
                 {% if related_complaints %}
-                    <div class="card">
+                    <div class="card mt-4">
                         <div class="card-header">
                             <i class="fas fa-link text-primary"></i>
                             Similar Complaints

@@ -390,6 +390,7 @@ def share_complaint(request, complaint_number):
     
     share, created = ComplaintShare.objects.get_or_create(
         complaint=complaint,
+        created_by=request.user,
         shared_by=request.user,
         defaults={'platform': platform}
     )
@@ -415,6 +416,7 @@ def report_complaint(request, complaint_number):
     # Check if user already reported this complaint
     existing_report = ComplaintReport.objects.filter(
         complaint=complaint,
+        created_by=request.user,
         reported_by=request.user
     ).first()
     
@@ -427,6 +429,7 @@ def report_complaint(request, complaint_number):
     # Create the report
     report = ComplaintReport.objects.create(
         complaint=complaint,
+        created_by=request.user,
         reported_by=request.user,
         reason=reason,
         description=description

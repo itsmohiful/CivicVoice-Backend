@@ -161,7 +161,7 @@
     </div>
 
     <!-- Category Filter Buttons -->
-    <div class="mb-4">
+    <div class="mb-4 mt-4">
         <div class="btn-group" role="group" aria-label="Category filters">
             <a href="{% url 'complaints:list' %}" class="btn btn-outline-secondary {% if not request.GET.category %}active{% endif %}">
                 All Categories
@@ -179,7 +179,7 @@
     <!-- Complaints List -->
     <div class="row">
         {% for complaint in complaints %}
-            <div class="col-lg-6 col-xl-4">
+            <div class="col-lg-6 col-xl-4 mb-4">
                 <div class="complaint-card card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="m-0 font-weight-bold" style="color: {{ complaint.category.color }};">
@@ -232,16 +232,19 @@
                         <div class="row text-center">
                             <div class="col-3">
                                 <small class="text-muted">
+                                    views
                                     <i class="fas fa-eye"></i> {{ complaint.view_count }}
                                 </small>
                             </div>
                             <div class="col-3">
                                 <small class="text-muted">
+                                    React
                                     <i class="fas fa-thumbs-up"></i> {{ complaint.reaction_count }}
                                 </small>
                             </div>
                             <div class="col-3">
                                 <small class="text-muted">
+                                    Comment
                                     <i class="fas fa-comments"></i> {{ complaint.comment_count }}
                                 </small>
                             </div>

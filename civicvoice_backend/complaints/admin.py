@@ -177,6 +177,7 @@ class ComplaintReportAdmin(admin.ModelAdmin):
     list_filter = ('reason', 'is_resolved', 'created_at')
     search_fields = ('complaint__complaint_number', 'reported_by__email', 'description')
     readonly_fields = ('created_at', 'resolved_at')
+    list_display_links = ('reported_by',)
     
     actions = ['mark_as_resolved']
     
