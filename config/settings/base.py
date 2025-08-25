@@ -424,3 +424,4 @@ SIMPLE_JWT = {
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+APPEND_SLASH=False # Disable appending slashes to URLs for example /api/v1/users/ to /api/v1/users/
