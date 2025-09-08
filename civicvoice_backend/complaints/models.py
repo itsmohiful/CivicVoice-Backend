@@ -293,10 +293,10 @@ class ComplaintAttachment(BaseModel):
     """File attachments for complaints"""
     complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(_("File"), upload_to='complaints/attachments/%Y/%m/')
-    original_name = models.CharField(_("Original Name"), max_length=255)
-    file_size = models.PositiveIntegerField(_("File Size"), help_text=_("Size in bytes"))
-    file_type = models.CharField(_("File Type"), max_length=100)
-    description = models.CharField(_("Description"), max_length=255, blank=True)
+    original_name = models.CharField(_("Original Name"), max_length=255, null=True, blank=True )
+    file_size = models.PositiveIntegerField(_("File Size"), help_text=_("Size in bytes"), null=True, blank=True)
+    file_type = models.CharField(_("File Type"), max_length=100, null=True, blank=True)
+    description = models.CharField(_("Description"), max_length=255, blank=True,null=True)
     
     class Meta:
         verbose_name = _("Complaint Attachment")

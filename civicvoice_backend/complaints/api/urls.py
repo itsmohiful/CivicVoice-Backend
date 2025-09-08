@@ -6,11 +6,12 @@ from civicvoice_backend.complaints.api.viewsets import (
     ComplaintReactionViewSet, ComplaintAttachmentViewSet, ComplaintShareViewSet,
     ComplaintFollowerViewSet, ComplaintReportViewSet, ComplaintStatusHistoryViewSet
 )
-from civicvoice_backend.users.api.views import RegisterView, MeView
+from civicvoice_backend.users.api.views import RegisterView, MeView,UserViewSet
 from civicvoice_backend.complaints.api.views import api_root
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
 router.register(r'categories', ComplaintCategoryViewSet, basename='complaintcategory')
 router.register(r'subcategories', ComplaintSubCategoryViewSet, basename='complaintsubcategory')
 router.register(r'tags', ComplaintTagViewSet, basename='complainttag')

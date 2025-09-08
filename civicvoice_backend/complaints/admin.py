@@ -84,7 +84,7 @@ class ComplaintAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('complaint_number', 'title', 'description', 'category', 'subcategory')
+            'fields': ('complaint_number', 'title', 'description', 'category', 'subcategory','tags', 'created_by')
         }),
         (_('Status & Priority'), {
             'fields': ('status', 'priority', 'assigned_to', 'reference_number')

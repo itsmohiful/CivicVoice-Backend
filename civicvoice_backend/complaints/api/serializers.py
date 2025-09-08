@@ -5,6 +5,7 @@ from civicvoice_backend.complaints.models import (
     Complaint, ComplaintComment, ComplaintReaction, ComplaintAttachment,
     ComplaintShare, ComplaintFollower, ComplaintReport, ComplaintStatusHistory
 )
+from civicvoice_backend.users.api.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -349,20 +350,23 @@ class ComplaintSerializer(serializers.ModelSerializer):
 # Summary/List serializers for better performance
 class ComplaintListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for complaint lists"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    location_display = serializers.SerializerMethodField()
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
-    priority_display = serializers.CharField(source='get_priority_display', read_only=True)
-    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
-    
+    # category_name = serializers.CharField(source='category.name', read_only=True)
+    # location_display = serializers.SerializerMethodField()
+    # status_display = serializers.CharField(source='get_status_display', read_only=True)
+    # priority_display = serializers.CharField(source='get_priority_display', read_only=True)
+    # created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    # created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    # category = serializers.PrimaryKeyRelatedField(read_only=True)
+    created_by = UserSerializer(read_only=True)
+    category = ComplaintCategorySerializer(read_only=True)
+    location = LocationSerializer(read_only=True)
+    tags = ComplaintTagSerializer(many=True, read_only=True)
+
+   
     class Meta:
         model = Complaint
-        fields = [
-            'id', 'title', 'complaint_number', 'status', 'status_display',
-            'priority', 'priority_display', 'category_name', 'location_display',
-            'created_by_name', 'submitted_at', 'due_date', 'view_count',
-            'reaction_count', 'comment_count', 'created_at'
-        ]
+        fields = '__all__'
+       
     
     def get_location_display(self, obj):
         if obj.location:

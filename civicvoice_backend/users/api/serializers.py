@@ -70,3 +70,19 @@ class MeSerializer(serializers.ModelSerializer):
             "is_staff": instance.is_staff,
             "image": instance.image.url if getattr(instance, "image", None) else None,
         }
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ['password', 'is_superuser', 
+                   'is_staff', 'groups',
+                    'reset_password_token', 'reset_otp', 'verify_token',
+                     'user_permissions']
+   
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "password", "first_name", "last_name", "phone",
+                  "image"]
