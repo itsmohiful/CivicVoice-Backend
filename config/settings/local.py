@@ -16,6 +16,30 @@ SECRET_KEY = env(
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]  # noqa: S104
 
+# CORS settings for local development
+# ------------------------------------------------------------------------------
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development
+CORS_ALLOW_CREDENTIALS = True
+
+# Additional CORS settings for development
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React
+    "http://localhost:3001",  # Next.js alternative
+    "http://localhost:4200",  # Angular
+    "http://localhost:8080",  # Vue.js
+    "http://localhost:5173",  # Vite
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001", 
+    "http://127.0.0.1:4200",
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",  # Django dev server
+    "http://127.0.0.1:8000",
+]
+
+# Update CSRF trusted origins for local development
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+
 # CACHES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#caches

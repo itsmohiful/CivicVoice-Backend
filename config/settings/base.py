@@ -394,10 +394,58 @@ GRAPHQL_JWT = {
 TRUSTED_CORS_ORIGINS = env.list("TRUSTED_CORS_ORIGINS", default=[])
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
-CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = TRUSTED_CORS_ORIGINS
-CORS_ORIGIN_WHITELIST = TRUSTED_CORS_ORIGINS
+# For development - allow all origins
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
+
+# For production - use specific origins
+if not CORS_ALLOW_ALL_ORIGINS and TRUSTED_CORS_ORIGINS:
+    CORS_ALLOWED_ORIGINS = TRUSTED_CORS_ORIGINS
+else:
+    # Default development origins
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",  # React default
+        "http://localhost:3001",  # Next.js alternative
+        "http://localhost:4200",  # Angular default
+        "http://localhost:8080",  # Vue.js default
+        "http://localhost:5173",  # Vite default
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:4200",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5173",
+    ]
+
+# CSRF and additional CORS settings
+CSRF_TRUSTED_ORIGINS = TRUSTED_CORS_ORIGINS if TRUSTED_CORS_ORIGINS else CORS_ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
+
+# Allow common headers that frontend frameworks use
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-api-key',
+    'cache-control',
+]
+
+# Allow common methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Preflight cache time
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 # config/settings/base.py
 SILENCED_SYSTEM_CHECKS = [

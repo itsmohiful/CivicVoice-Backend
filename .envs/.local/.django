@@ -14,8 +14,9 @@ CELERY_FLOWER_USER=SHsKcDYEEJBfSxEmSGfxyByMEjYeFaOe
 CELERY_FLOWER_PASSWORD=Nz5dxWq6SOU9Wmdeh33RXuyrCMWduCnuva5cztbJxd4l8mSibBbGi6o3Tg5uAJek
 
 
-# CORS
-TRUSTED_CORS_ORIGINS="http://localhost,capacitor://localhost,http://localhost:3000,http://localhost:8000"
+# CORS - Updated for frontend development
+CORS_ALLOW_ALL_ORIGINS=True
+TRUSTED_CORS_ORIGINS="http://localhost:3000,http://localhost:3001,http://localhost:4200,http://localhost:8080,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:4200,http://127.0.0.1:8080,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000,capacitor://localhost"
 
 # Email
 # ------------------------------------------------------------------------------
