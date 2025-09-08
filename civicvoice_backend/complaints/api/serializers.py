@@ -90,6 +90,28 @@ class ComplaintAttachmentSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.file.url)
             return obj.file.url
         return None
+    
+    def validate_file(self, value):
+        """Validate file upload"""
+        if value:
+            # Check file size (max 10MB)
+            if value.size > 10 * 1024 * 1024:
+                raise serializers.ValidationError("File size cannot exceed 10MB")
+            
+            # Store file metadata
+            if hasattr(value, 'name'):
+                self.validated_file_data = {
+                    'original_name': value.name,
+                    'file_size': value.size,
+                    'file_type': value.content_type if hasattr(value, 'content_type') else 'unknown'
+                }
+        return value
+    
+    def create(self, validated_data):
+        # Add file metadata if available
+        if hasattr(self, 'validated_file_data'):
+            validated_data.update(self.validated_file_data)
+        return super().create(validated_data)
 
 
 class ComplaintReactionSerializer(serializers.ModelSerializer):
@@ -253,6 +275,14 @@ class ComplaintSerializer(serializers.ModelSerializer):
     reactions = ComplaintReactionSerializer(many=True, read_only=True)
     status_history = ComplaintStatusHistorySerializer(many=True, read_only=True)
     
+    # Simplified file upload field
+    attachment_files = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True,
+        required=False,
+        help_text="List of files to attach to the complaint"
+    )
+    
     # Computed fields
     can_edit = serializers.SerializerMethodField()
     can_view = serializers.SerializerMethodField()
@@ -276,6 +306,8 @@ class ComplaintSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
             # Related data
             'attachments', 'comments', 'reactions', 'status_history',
+            # File upload field
+            'attachment_files',
             # Computed fields
             'can_edit', 'can_view', 'is_following', 'user_reaction',
             'reaction_counts', 'is_overdue'
@@ -290,6 +322,18 @@ class ComplaintSerializer(serializers.ModelSerializer):
             'can_edit', 'can_view', 'is_following', 'user_reaction',
             'reaction_counts', 'is_overdue'
         ]
+    
+    def validate_attachment_files(self, files):
+        """Validate uploaded files"""
+        if len(files) > 10:  # Maximum 10 files per complaint
+            raise serializers.ValidationError("Maximum 10 files allowed per complaint")
+        
+        for file in files:
+            # Check file size (max 10MB per file)
+            if file.size > 10 * 1024 * 1024:
+                raise serializers.ValidationError(f"File '{file.name}' exceeds 10MB limit")
+        
+        return files
     
     def get_location_display(self, obj):
         if obj.location:
@@ -337,14 +381,40 @@ class ComplaintSerializer(serializers.ModelSerializer):
         return obj.is_overdue
     
     def create(self, validated_data):
+        # Extract attachment files
+        attachment_files = validated_data.pop('attachment_files', [])
+        
         # Set the user from request
         validated_data['created_by'] = self.context['request'].user
+        
         # Remove tags from validated_data if present (will be set separately)
         tags_data = validated_data.pop('tags', [])
+        
+        # Create the complaint
         complaint = super().create(validated_data)
+        
+        # Set tags if provided
         if tags_data:
             complaint.tags.set(tags_data)
+        
+        # Create attachments if files were uploaded
+        if attachment_files:
+            self._create_attachments(complaint, attachment_files)
+        
         return complaint
+    
+    def _create_attachments(self, complaint, files):
+        """Create attachment objects for uploaded files"""
+        for file in files:
+            # Create attachment with minimal data
+            ComplaintAttachment.objects.create(
+                complaint=complaint,
+                file=file,
+                original_name=file.name,
+                file_size=file.size,
+                file_type=getattr(file, 'content_type', 'unknown'),
+                created_by=complaint.created_by
+            )
 
 
 # Summary/List serializers for better performance
@@ -372,3 +442,100 @@ class ComplaintListSerializer(serializers.ModelSerializer):
         if obj.location:
             return f"{obj.location.area}, {obj.location.city}"
         return None
+
+
+class ComplaintCreateSerializer(serializers.ModelSerializer):
+    """Specialized serializer for creating complaints with attachments"""
+    # Simplified file upload field
+    attachment_files = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True,
+        required=False,
+        help_text="List of files to attach to the complaint (max 10 files, 10MB each)"
+    )
+    
+    # Read-only fields for response
+    complaint_number = serializers.CharField(read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    subcategory_name = serializers.CharField(source='subcategory.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.name', read_only=True)
+    attachments = ComplaintAttachmentSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Complaint
+        fields = [
+            # Basic fields
+            'id', 'title', 'description', 'complaint_number', 'status',
+            'priority', 'privacy', 'allow_comments', 'allow_sharing',
+            'category', 'category_name', 'subcategory', 'subcategory_name',
+            'tags', 'location', 'incident_date', 'reference_number',
+            # File upload field
+            'attachment_files',
+            # Response fields
+            'created_by', 'created_by_name', 'attachments',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'complaint_number', 'created_by', 'created_by_name',
+            'category_name', 'subcategory_name', 'attachments',
+            'created_at', 'updated_at'
+        ]
+    
+    def validate_attachment_files(self, files):
+        """Validate uploaded files"""
+        if len(files) > 10:
+            raise serializers.ValidationError("Maximum 10 files allowed per complaint")
+        
+        total_size = 0
+        for file in files:
+            # Check individual file size (max 10MB)
+            if file.size > 10 * 1024 * 1024:
+                raise serializers.ValidationError(f"File '{file.name}' exceeds 10MB limit")
+            
+            total_size += file.size
+            
+            # Check total size (max 50MB total)
+            if total_size > 50 * 1024 * 1024:
+                raise serializers.ValidationError("Total file size cannot exceed 50MB")
+        
+        return files
+    
+    def create(self, validated_data):
+        # Extract attachment files
+        attachment_files = validated_data.pop('attachment_files', [])
+        
+        # Set the user from request
+        validated_data['created_by'] = self.context['request'].user
+        
+        # Remove tags from validated_data if present (will be set separately)
+        tags_data = validated_data.pop('tags', [])
+        
+        # Create the complaint
+        complaint = super().create(validated_data)
+        
+        # Set tags if provided
+        if tags_data:
+            complaint.tags.set(tags_data)
+        
+        # Create attachments if files were uploaded
+        if attachment_files:
+            self._create_attachments(complaint, attachment_files)
+        
+        return complaint
+    
+    def _create_attachments(self, complaint, files):
+        """Create attachment objects for uploaded files"""
+        attachments = []
+        for file in files:
+            # Create attachment with minimal required data
+            attachment = ComplaintAttachment.objects.create(
+                complaint=complaint,
+                file=file,
+                original_name=file.name,
+                file_size=file.size,
+                file_type=getattr(file, 'content_type', 'unknown'),
+                created_by=complaint.created_by
+            )
+            attachments.append(attachment)
+        
+        return attachments

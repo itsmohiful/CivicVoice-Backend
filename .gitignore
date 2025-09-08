@@ -24,7 +24,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
+/env/ 
+env/
+.venv/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -66,6 +68,7 @@ target/
 celerybeat-schedule
 
 # Environments
+env/
 .venv
 venv/
 ENV/

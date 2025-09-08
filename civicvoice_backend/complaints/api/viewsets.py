@@ -15,9 +15,9 @@ from civicvoice_backend.complaints.models import (
 from civicvoice_backend.complaints.api.serializers import (
     ComplaintCategorySerializer, ComplaintSubCategorySerializer,
     ComplaintTagSerializer, LocationSerializer, ComplaintSerializer,
-    ComplaintListSerializer, ComplaintCommentSerializer, ComplaintReactionSerializer,
-    ComplaintAttachmentSerializer, ComplaintShareSerializer, ComplaintFollowerSerializer,
-    ComplaintReportSerializer, ComplaintStatusHistorySerializer
+    ComplaintListSerializer, ComplaintCreateSerializer, ComplaintCommentSerializer, 
+    ComplaintReactionSerializer, ComplaintAttachmentSerializer, ComplaintShareSerializer, 
+    ComplaintFollowerSerializer, ComplaintReportSerializer, ComplaintStatusHistorySerializer
 )
 from civicvoice_backend.complaints.api.filters import (
     ComplaintFilter, ComplaintCategoryFilter, ComplaintCommentFilter,
@@ -165,6 +165,8 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return ComplaintListSerializer
+        elif self.action == 'create':
+            return ComplaintCreateSerializer
         return ComplaintSerializer
     
     def get_queryset(self):
