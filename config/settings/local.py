@@ -40,6 +40,31 @@ CORS_ALLOWED_ORIGINS = [
 # Update CSRF trusted origins for local development
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
+# Additional CORS headers for development (including common custom headers)
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-api-key',
+    'x-request-id',
+    'x-correlation-id',
+    'x-trace-id',
+    'x-session-id',
+    'x-client-id',
+    'cache-control',
+    'pragma',
+    'expires',
+    'etag',
+    'if-none-match',
+    'if-modified-since',
+]
+
 # CACHES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#caches

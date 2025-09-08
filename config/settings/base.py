@@ -431,7 +431,15 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
     'x-api-key',
+    'x-request-id',
+    'x-correlation-id',
+    'x-trace-id',
     'cache-control',
+    'pragma',
+    'expires',
+    'etag',
+    'if-none-match',
+    'if-modified-since',
 ]
 
 # Allow common methods
