@@ -431,13 +431,14 @@ class ComplaintListSerializer(serializers.ModelSerializer):
     category = ComplaintCategorySerializer(read_only=True)
     location = LocationSerializer(read_only=True)
     tags = ComplaintTagSerializer(many=True, read_only=True)
+    attachments = ComplaintAttachmentSerializer(many=True, read_only=True)
 
    
     class Meta:
         model = Complaint
         fields = '__all__'
-       
-    
+        include = ['attachments']
+
     def get_location_display(self, obj):
         if obj.location:
             return f"{obj.location.area}, {obj.location.city}"
