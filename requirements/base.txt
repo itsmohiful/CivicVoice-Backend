@@ -21,7 +21,7 @@ django-model-utils==4.5.1  # https://github.com/jazzband/django-model-utils
 django-allauth[mfa]==64.1.0  # https://github.com/pennersr/django-allauth
 django-crispy-forms==2.3  # https://github.com/django-crispy-forms/django-crispy-forms
 crispy-bootstrap5==2024.2  # https://github.com/django-crispy-forms/crispy-bootstrap5
-django-redis==5.4.0  # https://github.com/jazzband/django-redis
+django-redis==6.0.0  # https://github.com/jazzband/django-redis
 # Graphene
 graphene-django==3.2.2  # https://github.com/graphql-python/graphene-django
 django-graphql-jwt==0.4.0  # https://github.com/flavors/django-graphql-jwt
