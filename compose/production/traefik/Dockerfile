@@ -1,4 +1,4 @@
-FROM docker.io/traefik:3.1.2
+FROM docker.io/traefik:3.6.2
 
 # Install gettext for envsubst
 RUN apk add --no-cache gettext nano
